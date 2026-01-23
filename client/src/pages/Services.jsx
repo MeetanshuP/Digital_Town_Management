@@ -1,0 +1,95 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import ServiceCard from '../components/ServiceCard';
+import { Search, Filter, PhoneCall } from 'lucide-react';
+
+const Services = () => {
+    const [services, setServices] = useState([]);
+    const [filteredServices, setFilteredServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [activeCategory, setActiveCategory] = useState('All');
+
+    const categories = ['All', 'Health', 'Police', 'Education', 'Government', 'Utilities'];
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const res = await axios.get('/api/services');
+                setServices(res.data);
+                setFilteredServices(res.data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchServices();
+    }, []);
+
+    useEffect(() => {
+        if (activeCategory === 'All') {
+            setFilteredServices(services);
+        } else {
+            setFilteredServices(services.filter(s => s.category === activeCategory));
+        }
+    }, [activeCategory, services]);
+
+    return (
+        <div className="space-y-8">
+            <div className="bg-blue-600 rounded-3xl p-10 text-white flex items-center justify-between overflow-hidden relative shadow-lg">
+                <div className="relative z-10">
+                    <h1 className="text-4xl font-extrabold mb-2">Local Services Directory</h1>
+                    <p className="text-blue-100 text-lg">Find essential services and contact details in your village.</p>
+                </div>
+                <div className="bg-white/10 p-6 rounded-full relative z-10">
+                    <PhoneCall size={48} />
+                </div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex flex-wrap gap-2">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === cat
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+                <div className="relative w-full md:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search services..."
+                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    />
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredServices.length > 0 ? (
+                        filteredServices.map(service => <ServiceCard key={service._id} service={service} />)
+                    ) : (
+                        <div className="col-span-full py-20 text-center">
+                            <Filter size={48} className="mx-auto text-gray-300 mb-4" />
+                            <h3 className="text-xl font-bold text-gray-400">No services found in this category.</h3>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Services;
