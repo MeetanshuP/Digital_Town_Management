@@ -5,11 +5,13 @@ const ServiceProviderRequests = () => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
+    
     const token = localStorage.getItem('token');
     axios.get("/api/admin/service-providers", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      
     })
       .then(res => setRequests(res.data))
       .catch(console.error);

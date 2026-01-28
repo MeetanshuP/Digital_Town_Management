@@ -1,4 +1,6 @@
+const mongoose = require("mongoose");
 const User = require("../models/user");
+const ServiceProvider = require("../models/serviceProvider");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwt");
 
@@ -175,6 +177,11 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
+        const serviceProviderRequest = await ServiceProvider.findOne({ user: user._id }).sort({ updatedAt: -1 });
+        const serviceProviderStatus = serviceProviderRequest ? serviceProviderRequest.status : "NONE";
+
+        console.log(`[DEBUG] Login Status for ${user.email}: ${serviceProviderStatus}`);
+
         // ✅ Decide effective role at login time
         const effectiveRole = ADMIN_EMAILS.includes(user.email)
             ? "admin"
@@ -191,7 +198,7 @@ exports.loginUser = async (req, res) => {
             role: effectiveRole,
         });
 
-        return res.status(200).json({
+        const responseData = {
             message: "Login successful",
             token,
             user: {
@@ -201,8 +208,10 @@ exports.loginUser = async (req, res) => {
                 contactNumber: user.contactNumber,
                 email: user.email,
                 role: effectiveRole,
+                serviceProviderStatus: serviceProviderStatus,
             },
-        });
+        };
+        return res.status(200).json(responseData);
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -224,7 +233,14 @@ exports.getProfile = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        return res.status(200).json(user);
+        // Explicitly cast to ObjectId
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const serviceProviderRequest = await ServiceProvider.findOne({ user: userId }).sort({ updatedAt: -1 });
+        const serviceProviderStatus = serviceProviderRequest ? serviceProviderRequest.status : "NONE";
+
+        console.log(`[DEBUG] Profile Status for ${user.email}: ${serviceProviderStatus}`);
+
+        return res.status(200).json({ ...user.toObject(), serviceProviderStatus });
     } catch (error) {
         return res.status(500).json({
             message: "Server error",

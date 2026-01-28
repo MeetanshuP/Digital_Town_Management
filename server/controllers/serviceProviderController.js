@@ -36,7 +36,7 @@ exports.createServiceProviderRequest = async (req, res) => {
       user: req.user.id,
       serviceCategory,
       serviceTitle,
-      // description,
+      description,
       // experience,
       //   location,
       // serviceImage,

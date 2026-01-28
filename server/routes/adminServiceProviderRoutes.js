@@ -4,15 +4,15 @@ const {
   updateRequestStatus,
 } = require("../controllers/adminServiceProviderController");
 const authMiddleware = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/rbacMiddleware");
+const { isAdmin } = require("../middleware/rbacMiddleware");
 
 const router = express.Router();
 
-router.get("/service-providers", authMiddleware, adminOnly, getPendingRequests);
+router.get("/service-providers", authMiddleware, isAdmin, getPendingRequests);
 router.patch(
   "/service-providers/:id",
   authMiddleware,
-  adminOnly,
+  isAdmin,
   updateRequestStatus
 );
 
