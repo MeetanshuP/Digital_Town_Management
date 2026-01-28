@@ -18,6 +18,11 @@ const MarketplaceItemSchema = new Schema ({
         ref : "User",
         required : true,
     },
+    category : {
+        type: Schema.Types.ObjectId,
+        ref: "MarketplaceCategory",
+        required : true,
+    },
     images : {
         type : [String],
     },
