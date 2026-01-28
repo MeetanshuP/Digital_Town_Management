@@ -1,33 +1,33 @@
-const {Schema, model} = require ("mongoose");
+const { Schema, model } = require("mongoose");
 const ServiceSchema = new Schema({
-    serviceName : {
-        type : String,
-        required : true,
-        trim : true,
+    serviceName: {
+        type: String,
+        required: true,
+        trim: true,
     },
-    description : {
-        type : String,
+    description: {
+        type: String,
     },
-    category : {
+    category: {
         type: Schema.Types.ObjectId,
         ref: "ServiceCategory",
-        required : true,
+        required: true,
     },
-    provider : {
-        type : Schema.Types.ObjectId,
-        ref : "User",
-        required : true,
+    provider: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
-    contactNumber : {
-        type : String,
+    contactNumber: {
+        type: String,
     },
-    status : {
-        type : String,
-        enum : ["pending", "approved", "rejected"],
-        default : "pending",
+    status: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
     },
 },
-    {timestamps : true},
+    { timestamps: true },
 );
 
 ServiceSchema.index({ provider: 1 });

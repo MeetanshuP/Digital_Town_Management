@@ -15,13 +15,36 @@ const BecomeServiceProvider = () => {
     console.log('[DEBUG] BecomeServiceProvider Loading:', loading);
 
     const [form, setForm] = useState({
-        // ... (lines remains same)
+                serviceCategory: '',
+        serviceTitle: '',
+        description: '',
+        // experience: '',
+        // location: '',
     });
 
-    // ... (lines remains same)
+   const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+   }
 
     const handleSubmit = async (e) => {
-        // ... (lines remains same)
+        e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSubmitting(true);
+
+    try {
+        const res = await applyForServiceProvider(form);
+        setSuccess(res.message || 'Request submitted successfully');
+
+        // optional: redirect after short delay
+        setTimeout(() => {
+            navigate('/');
+        }, 1500);
+    } catch (err) {
+        setError(err.response?.data?.message || 'Submission failed');
+    } finally {
+         setSubmitting(false);
+
     };
 
     if (loading) {
@@ -54,6 +77,7 @@ const BecomeServiceProvider = () => {
             </div>
         );
     }
+    };
 
     if (user?.serviceProviderStatus === 'APPROVED') {
         return (
