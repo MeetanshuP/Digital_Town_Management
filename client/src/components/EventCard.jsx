@@ -12,7 +12,7 @@ const EventCard = ({ event }) => {
         }
     };
 
-    const eventDate = new Date(event.date);
+    const eventDate = new Date(event.eventDate);
 
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all flex flex-col md:flex-row gap-6">
@@ -22,30 +22,22 @@ const EventCard = ({ event }) => {
             </div>
 
             <div className="flex-grow">
-                <div className="flex justify-between items-start mb-2">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getCategoryStyles(event.category)}`}>
-                        {event.category}
-                    </span>
-                </div>
+                {event.category && (
+                    <div className="flex justify-between items-start mb-2">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getCategoryStyles(event.category)}`}>
+                            {event.category}
+                        </span>
+                    </div>
+                )}
                 <h3 className="text-xl font-extrabold text-gray-800 mb-2">{event.title}</h3>
                 <p className="text-gray-500 text-sm mb-4 line-clamp-2">{event.description}</p>
 
                 <div className="flex flex-wrap gap-4 text-sm font-medium text-gray-500">
                     <div className="flex items-center gap-2">
-                        <MapPin size={16} className="text-purple-600" />
-                        {event.location}
-                    </div>
-                    <div className="flex items-center gap-2">
                         <Clock size={16} className="text-purple-600" />
                         {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                 </div>
-            </div>
-
-            <div className="flex items-center">
-                <button className="w-full md:w-auto bg-gray-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-md">
-                    Join Event
-                </button>
             </div>
         </div>
     );
