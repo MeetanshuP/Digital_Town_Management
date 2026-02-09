@@ -23,7 +23,7 @@ const ImageUpload = ({ onUpload }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const res = await axios.post("/api/upload/image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",

@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
             // Validate token or fetch profile
             fetchProfile(token);
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
                 serviceProviderStatus: res.data.serviceProviderStatus || 'NONE',
             });
         } catch (err) {
-            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
             setUser(null);
         } finally {
             setLoading(false);
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = (userData, token) => {
-        localStorage.setItem('token', token);
+        sessionStorage.setItem('token', token);
         setUser({
             ...userData,
             role: userData.role || 'USER',
@@ -45,13 +45,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setUser(null);
     };
 
 
    const applyForServiceProvider = async (formData) => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const res = await axios.post(
             '/api/service-provider/apply',

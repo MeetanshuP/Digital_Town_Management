@@ -22,8 +22,30 @@ const BecomeServiceProvider = () => {
         // location: '',
     });
 
-    const handleChange = (e) => {
+
+   const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+   }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSubmitting(true);
+
+    try {
+        const res = await applyForServiceProvider(form);
+        setSuccess(res.message || 'Request submitted successfully');
+
+        // optional: redirect after short delay
+        setTimeout(() => {
+            navigate('/');
+        }, 1500);
+    } catch (err) {
+        setError(err.response?.data?.message || 'Submission failed');
+    } finally {
+         setSubmitting(false);
+
     };
 
     const handleSubmit = async (e) => {
@@ -76,6 +98,7 @@ const BecomeServiceProvider = () => {
             </div>
         );
     }
+    };
 
     if (user?.serviceProviderStatus === 'APPROVED') {
         return (

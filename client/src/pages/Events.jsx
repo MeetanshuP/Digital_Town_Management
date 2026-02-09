@@ -12,7 +12,8 @@ const Events = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        eventDate: ''
+        eventDate: '',
+        eventTime: ''
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -38,7 +39,7 @@ const Events = () => {
         setError('');
         setSubmitting(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             if (!token) {
                 setError('Please login to create an event');
                 setSubmitting(false);
@@ -116,16 +117,29 @@ const Events = () => {
                                     required
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Event Date</label>
-                                <input
-                                    type="date"
-                                    name="eventDate"
-                                    value={formData.eventDate}
-                                    onChange={onChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
-                                    required
-                                />
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Event Date</label>
+                                    <input
+                                        type="date"
+                                        name="eventDate"
+                                        value={formData.eventDate}
+                                        onChange={onChange}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Event Time</label>
+                                    <input
+                                        type="time"
+                                        name="eventTime"
+                                        value={formData.eventTime}
+                                        onChange={onChange}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
@@ -144,7 +158,7 @@ const Events = () => {
                                     onClick={() => {
                                         setShowModal(false);
                                         setError('');
-                                        setFormData({ title: '', description: '', eventDate: '' });
+                                        setFormData({ title: '', description: '', eventDate: '', eventTime: '' });
                                     }}
                                     className="flex-1 px-4 py-3 rounded-xl border border-gray-200 font-bold text-gray-700 hover:bg-gray-50 transition-all"
                                 >

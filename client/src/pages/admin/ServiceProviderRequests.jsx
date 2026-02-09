@@ -6,7 +6,7 @@ const ServiceProviderRequests = () => {
 
   useEffect(() => {
     
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     axios.get("/api/admin/service-providers", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -18,7 +18,7 @@ const ServiceProviderRequests = () => {
   }, []);
 
   const handleAction = async (id, action) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     await axios.patch(`/api/admin/service-providers/${id}`, { action }, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ const ServiceProviderRequests = () => {
       <div className="space-y-4">
         {requests.map(req => (
           <div key={req._id} className="bg-white p-4 rounded shadow">
-            <p><strong>{req.user.firstName}</strong></p>
+            <p><strong>{req.user?.firstName}</strong></p>
             <p>{req.serviceCategory}</p>
 
             <div className="flex gap-4 mt-3">

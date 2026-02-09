@@ -43,7 +43,7 @@ app.get('/', (req, res) => {
 // Global Error Handler
 
 app.use((err, req, res, next) => {
-    console.error("❌ Error:", err.message);
+    console.error(" Error:", err.message);
     res.status(err.statusCode || 500).json({
         success: false,
         message: err.message || 'Internal Server Error'
@@ -52,6 +52,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port : ${PORT}`);
 });

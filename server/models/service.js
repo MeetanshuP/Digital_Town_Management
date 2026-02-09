@@ -1,17 +1,17 @@
-const {Schema, model} = require ("mongoose");
+const { Schema, model } = require("mongoose");
 const ServiceSchema = new Schema({
-    serviceName : {
-        type : String,
-        required : true,
-        trim : true,
+    serviceName: {
+        type: String,
+        required: true,
+        trim: true,
     },
-    description : {
-        type : String,
+    description: {
+        type: String,
     },
-    category : {
+    category: {
         type: Schema.Types.ObjectId,
         ref: "ServiceCategory",
-        required : true,
+        required: true,
     },
     state: {
         type: String,
@@ -30,8 +30,8 @@ const ServiceSchema = new Schema({
         required : true,
         // default: null
     },
-    contactNumber : {
-        type : String,
+    contactNumber: {
+        type: String,
     },
     location: {
         type: {
@@ -50,7 +50,7 @@ const ServiceSchema = new Schema({
     default: "ACTIVE"
   }
 },
-    {timestamps : true},
+    { timestamps: true },
 );
 
 ServiceSchema.index({ provider: 1 });
