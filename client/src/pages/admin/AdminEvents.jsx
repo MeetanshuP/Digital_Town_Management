@@ -15,6 +15,7 @@ const AdminEvents = () => {
         title: '',
         description: '',
         eventDate: '',
+        eventTime: '',
         status: 'upcoming'
     });
     
@@ -41,7 +42,7 @@ const AdminEvents = () => {
     };
 
     const openCreateModal = () => {
-        setFormData({ title: '', description: '', eventDate: '', status: 'upcoming' });
+        setFormData({ title: '', description: '', eventDate: '', eventTime: '', status: 'upcoming' });
         setIsEditing(false);
         setCurrentEventId(null);
         setError('');
@@ -53,10 +54,12 @@ const AdminEvents = () => {
             title: event.title,
             description: event.description || '',
             eventDate: event.eventDate.split('T')[0], // Format date for input
+            eventTime: event.eventTime || '',
             status: event.status || 'upcoming'
         });
         setIsEditing(true);
         setCurrentEventId(event._id);
+
         setError('');
         setShowModal(true);
     };
@@ -65,7 +68,7 @@ const AdminEvents = () => {
         if (!window.confirm("Are you sure you want to delete this event?")) return;
         
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.delete(`/api/events/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -82,7 +85,7 @@ const AdminEvents = () => {
         setError('');
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
             
             if (isEditing) {
@@ -217,16 +220,29 @@ const AdminEvents = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-                                <input 
-                                    type="date" 
-                                    name="eventDate" 
-                                    value={formData.eventDate} 
-                                    onChange={handleInputChange} 
-                                    required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
-                                />
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
+                                    <input 
+                                        type="date" 
+                                        name="eventDate" 
+                                        value={formData.eventDate} 
+                                        onChange={handleInputChange} 
+                                        required
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Time</label>
+                                    <input 
+                                        type="time" 
+                                        name="eventTime" 
+                                        value={formData.eventTime} 
+                                        onChange={handleInputChange} 
+                                        required
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                                    />
+                                </div>
                             </div>
 
                             <div>

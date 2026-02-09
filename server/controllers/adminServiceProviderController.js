@@ -1,4 +1,4 @@
-const ServiceProviderRequest = require("../models/ServiceProvider");
+const ServiceProviderRequest = require("../models/serviceProvider");
 const User = require("../models/user");
 
 exports.getPendingRequests = async (req, res) => {

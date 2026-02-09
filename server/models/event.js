@@ -12,6 +12,9 @@ const EventSchema = new Schema({
         type: Date,
         required: true,
     },
+    eventTime: {
+        type: String,
+    },
     participants: [{
         type: Schema.Types.ObjectId,
         ref: "User",

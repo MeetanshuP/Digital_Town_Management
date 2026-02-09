@@ -5,7 +5,7 @@ const Event = require("../models/event");
 exports.getAllEvents = async (req, res) => {
     try {
         const events = await Event.find()
-            .sort({ eventDate: 1 }); // Sort by event date ascending
+            .sort({ eventDate: 1, eventTime: 1 }); // Sort by event date and time ascending
 
         return res.status(200).json(events);
     } catch (error) {
@@ -39,7 +39,7 @@ exports.getEventById = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
     try {
-        const { title, description, eventDate } = req.body;
+        const { title, description, eventDate, eventTime } = req.body;
 
         if (!title || !eventDate) {
             return res.status(400).json({
@@ -61,6 +61,7 @@ exports.createEvent = async (req, res) => {
             title,
             description,
             eventDate,
+            eventTime,
             status: "upcoming",
         });
 
@@ -80,7 +81,7 @@ exports.createEvent = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
     try {
-        const { title, description, eventDate, status } = req.body;
+        const { title, description, eventDate, eventTime, status } = req.body;
 
         const event = await Event.findById(req.params.id);
 
@@ -90,6 +91,7 @@ exports.updateEvent = async (req, res) => {
 
         if (title) event.title = title;
         if (description) event.description = description;
+        if (eventTime) event.eventTime = eventTime;
         if (eventDate) {
             const date = new Date(eventDate);
             const today = new Date();

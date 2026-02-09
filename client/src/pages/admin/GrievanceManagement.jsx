@@ -7,7 +7,7 @@ const GrievanceManagement = () => {
   useEffect(() => {
     const fetchGrievances = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         const res = await axios.get("/api/admin/grievances", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -22,7 +22,7 @@ const GrievanceManagement = () => {
   }, []);
 
   const updateStatus = async (id, status) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     await axios.patch(`/api/admin/grievances/${id}`, { status }, {
       headers: {
         Authorization: `Bearer ${token}`,

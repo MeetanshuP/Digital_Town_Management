@@ -26,7 +26,7 @@ const Grievance = () => {
         setSuccess('');
         setSubmitting(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             if (!token) {
                 setError('Please login to submit a grievance');
                 setSubmitting(false);
@@ -52,7 +52,7 @@ const Grievance = () => {
     useEffect(() => {
         const fetchGrievances = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 if (!token) return setLoading(false);
                 const res = await axios.get('/api/grievances', {
                     headers: { Authorization: `Bearer ${token}` }
