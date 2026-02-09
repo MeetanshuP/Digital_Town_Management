@@ -46,7 +46,7 @@ const Home = () => {
                         transition={{ delay: 0.4 }}
                         className="flex gap-4 justify-center"
                     >
-                        <Link to="/register" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-all">
+                        <Link to="/" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-all">
                             Join Community <ArrowRight size={20} />
                         </Link>
                     </motion.div>

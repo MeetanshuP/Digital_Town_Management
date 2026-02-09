@@ -13,24 +13,48 @@ const ServiceSchema = new Schema({
         ref: "ServiceCategory",
         required : true,
     },
+    state: {
+        type: String,
+        // required: true
+    },
+    district: String,
+    city: String,
+
+    address: {
+        type: String,
+        // required: true
+    },
     provider : {
         type : Schema.Types.ObjectId,
-        ref : "User",
+        ref : "ServiceProvider",
         required : true,
+        // default: null
     },
     contactNumber : {
         type : String,
     },
-    status : {
-        type : String,
-        enum : ["pending", "approved", "rejected"],
-        default : "pending",
+    location: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
+        },
+        coordinates: {
+        type: [Number], // [lng, lat]
+    }
     },
+
+  status: {
+    type: String,
+    enum: ["ACTIVE", "INACTIVE"],
+    default: "ACTIVE"
+  }
 },
     {timestamps : true},
 );
 
 ServiceSchema.index({ provider: 1 });
+ServiceSchema.index({ location: "2dsphere" });
 
 const Service = model("Service", ServiceSchema);
 module.exports = Service;

@@ -10,6 +10,11 @@ const ServiceCategorySchema = new Schema(
       trim: true,
     },
     description: String,
+    isActive: {
+    type: Boolean,
+    default: true
+  }
+    
     
   },
   { timestamps: true }

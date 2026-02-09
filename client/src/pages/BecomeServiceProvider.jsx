@@ -4,26 +4,48 @@ import { useNavigate } from 'react-router-dom';
 import { Briefcase, MapPin, FileText, Award } from 'lucide-react';
 
 const BecomeServiceProvider = () => {
-    const { user, loading, applyForServiceProvider } = useAuth();
+     const { applyForServiceProvider, user, loading } = useAuth();
     const navigate = useNavigate();
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [dismissedRejected, setDismissedRejected] = useState(false);
 
-    console.log('[DEBUG] BecomeServiceProvider User Status:', user?.serviceProviderStatus);
-    console.log('[DEBUG] BecomeServiceProvider Loading:', loading);
+    // console.log('[DEBUG] BecomeServiceProvider User Status:', user?.serviceProviderStatus);
+    // console.log('[DEBUG] BecomeServiceProvider Loading:', loading);
 
     const [form, setForm] = useState({
-        // ... (lines remains same)
+        serviceCategory: '',
+        serviceTitle: '',
+        description: '',
+        // experience: '',
+        // location: '',
     });
 
-    // ... (lines remains same)
-
-    const handleSubmit = async (e) => {
-        // ... (lines remains same)
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSubmitting(true);
+
+    try {
+        const res = await applyForServiceProvider(form);
+        setSuccess(res.message || 'Request submitted successfully');
+
+        // optional: redirect after short delay
+        setTimeout(() => {
+            navigate('/');
+        }, 1500);
+    } catch (err) {
+        setError(err.response?.data?.message || 'Submission failed');
+    } finally {
+        setSubmitting(false);
+    };
+    
     if (loading) {
         return (
             <div className="min-h-[70vh] flex items-center justify-center">
@@ -75,8 +97,8 @@ const BecomeServiceProvider = () => {
                 </div>
             </div>
         );
-    }
-
+    // }
+// };
     if (user?.serviceProviderStatus === 'REJECTED' && !dismissedRejected) {
         return (
             <div className="min-h-[70vh] flex items-center justify-center px-4">
@@ -99,7 +121,8 @@ const BecomeServiceProvider = () => {
             </div>
         );
     }
-
+}
+ };
     return (
         <div className="min-h-[70vh] flex items-center justify-center px-4">
             <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-gray-100">
@@ -121,9 +144,9 @@ const BecomeServiceProvider = () => {
                 )}
 
                 {success && (
-                    <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm font-medium mb-4">
-                        {success}
-                    </div>
+                     <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium mb-4">
+                    {error}
+                </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">

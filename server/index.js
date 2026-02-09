@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 
-const connectDB = require('./config/db');
+const {connectDB,pool} = require('./config/db');
 const morgan = require('morgan');
 
 const app = express();
@@ -11,6 +11,16 @@ app.use(express.json());
 app.use(morgan("dev"));
 // Connect Database
 connectDB();
+
+
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('DB Error', err);
+  } else {
+    console.log('DB Connected:', res.rows[0]);
+  }
+});
+
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/news", require("./routes/newsRoutes"));
@@ -22,6 +32,8 @@ app.use("/api/upload", require("./routes/uploadRoutes"));
 app.use("/api/service-provider", require("./routes/serviceProviderRoutes"));
 app.use("/api/admin", require("./routes/adminServiceProviderRoutes"));
 app.use("/api/admin", require("./routes/adminGrievanceRoutes"));
+app.use("/api/location", require("./routes/location"));
+app.use("/api/places", require("./routes/places"));
 
 
 app.get('/', (req, res) => {

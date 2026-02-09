@@ -2,29 +2,26 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ServiceCard from '../components/ServiceCard';
 import { Search, Filter, PhoneCall } from 'lucide-react';
+import ServiceMap from '../components/ServiceMap';
+
+const CITY_COORDS = {
+    Ahmedabad: { lat: 23.0225, lng: 72.5714 },
+    Gandhinagar: { lat: 23.2156, lng: 72.6369 },
+    Surat: { lat: 21.1702, lng: 72.8311 }
+};
 
 const Services = () => {
     const [services, setServices] = useState([]);
     const [filteredServices, setFilteredServices] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState('All');
+    const [location, setLocation] = useState(null);
+    const [locationError, setLocationError] = useState("");
+    const [currentLatLng, setCurrentLatLng] = useState(null);
+    const [mapCenter, setMapCenter] = useState([23.2156, 72.6369]); // default
 
-    const categories = ['All', 'Health', 'Police', 'Education', 'Government', 'Utilities'];
 
-    useEffect(() => {
-        const fetchServices = async () => {
-            try {
-                const res = await axios.get('/api/services');
-                setServices(res.data);
-                setFilteredServices(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchServices();
-    }, []);
+    const categories = ['All', 'Health', 'Education', 'Government', 'On Demand'];
 
     useEffect(() => {
         if (activeCategory === 'All') {
@@ -33,6 +30,100 @@ const Services = () => {
             setFilteredServices(services.filter(s => s.category === activeCategory));
         }
     }, [activeCategory, services]);
+
+    const handleUseLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation not supported");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            successLocation,
+            errorLocation,
+            { enableHighAccuracy: true }
+        );
+    };
+
+    useEffect(() => {
+        if (!currentLatLng) return;
+
+        fetchNearbyPlaces(
+            currentLatLng.lat,
+            currentLatLng.lng,
+            activeCategory
+        );
+    }, [activeCategory, currentLatLng]);
+
+
+
+    const handleCitySelect = (city) => {
+        if (!CITY_COORDS[city]) return;
+
+        const { lat, lng } = CITY_COORDS[city];
+        setLocation(city);
+        setLocationError("");
+        setCurrentLatLng({ lat, lng });
+        setMapCenter([lat, lng]); 
+        // The useEffect hook will detect changes to currentLatLng and activeCategory
+        // and trigger fetchNearbyPlaces automatically.
+    };
+
+
+
+    const successLocation = async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        setCurrentLatLng({ lat: latitude, lng: longitude });
+         setMapCenter([latitude, longitude]); 
+
+        try {
+            const geoRes = await axios.get(
+                `/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`
+            );
+
+            const city =
+                geoRes.data.address.city ||
+                geoRes.data.address.town ||
+                geoRes.data.address.village;
+
+            setLocation(city || "Near you");
+
+            await fetchNearbyPlaces(latitude, longitude, activeCategory);
+        } catch (err) {
+            setLocationError("Failed to load nearby services");
+        }
+    };
+
+
+    const errorLocation = () => {
+        setLocationError("Location permission denied. Please select city manually.");
+    };
+
+    const fetchNearbyPlaces = async (lat, lng, category = null) => {
+        setLoading(true);
+        try {
+            const res = await axios.get("/api/places/nearby", {
+                params: {
+                    lat,
+                    lng,
+                    radius: 5000,
+                    category: category !== "All" ? category : null
+                }
+            });
+
+            setServices(res.data);
+            setFilteredServices(res.data);
+        } catch (err) {
+            console.error(err);
+            setLocationError("Failed to load nearby services");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     return (
         <div className="space-y-8">
@@ -54,8 +145,8 @@ const Services = () => {
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === cat
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
                             {cat}
@@ -70,7 +161,43 @@ const Services = () => {
                         className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                 </div>
+                <select
+                    onChange={(e) => handleCitySelect(e.target.value)}
+                    className="px-4 py-2 rounded-xl border"
+                >
+                    <option value="">Select City</option>
+                    <option value="Ahmedabad">Ahmedabad</option>
+                    <option value="Gandhinagar">Gandhinagar</option>
+                    <option value="Surat">Surat</option>
+                </select>
+
+                <button
+                    onClick={handleUseLocation}
+                    className="px-4 py-2 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition-all"
+                >
+                    Use My Location
+                </button>
+
             </div>
+
+            {location && (
+                <p className="text-sm text-green-600 font-semibold">
+                    Showing services near: {location}
+                </p>
+            )}
+
+            {locationError && (
+                <p className="text-sm text-red-500 font-semibold">
+                    {locationError}
+                </p>
+            )}
+            
+           <ServiceMap
+                services={filteredServices}
+                center={mapCenter}
+            />
+
+
 
             {loading ? (
                 <div className="flex justify-center items-center h-64">
