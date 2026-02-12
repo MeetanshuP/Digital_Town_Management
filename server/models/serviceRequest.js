@@ -13,24 +13,37 @@ const ServiceRequestSchema = new Schema({
     required: true
   },
 
+  provider: {
+    type: Schema.Types.ObjectId,
+    ref: "ServiceProvider",
+    required: true
+  },
+
+  description: {
+    type: String,
+    required: true
+  },
+
+  address: {
+    type: String,
+    required: true
+  },
+
+  preferredDate: Date,
+
   status: {
     type: String,
     enum: [
-      "SUBMITTED",
-      "IN_PROGRESS",
+      "PENDING",
+      "ACCEPTED",
       "COMPLETED",
-      "REJECTED"
+      "REJECTED",
+      "CANCELLED"
     ],
-    default: "SUBMITTED"
+    default: "PENDING"
   },
 
-  remarks: String,
-
-  updatedBy: {
-    type: String,
-    enum: ["USER", "ADMIN", "PROVIDER"],
-    default: "USER"
-  }
+  completedAt: Date
 
 }, { timestamps: true });
 

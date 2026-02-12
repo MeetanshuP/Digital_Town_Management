@@ -19,6 +19,8 @@ router.get("/nearby", async (req, res) => {
         type,
         address,
         phone as contact,
+        latitude,
+        longitude,
         ST_Distance(
           location::geography,
           ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
@@ -44,12 +46,12 @@ router.get("/nearby", async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
-    console.log(result.rows);
+    // console.log(result.rows);
     res.json(result.rows);
 
 
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });

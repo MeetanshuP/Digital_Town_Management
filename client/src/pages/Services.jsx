@@ -17,7 +17,7 @@ const Services = () => {
     const [activeCategory, setActiveCategory] = useState('All');
     const [location, setLocation] = useState(null);
     const [locationError, setLocationError] = useState("");
-    const [currentLatLng, setCurrentLatLng] = useState(null);
+    const [currentLatLng, setCurrentLatLng] = useState(CITY_COORDS.Gandhinagar);
     const [mapCenter, setMapCenter] = useState([23.2156, 72.6369]); // default
 
 
@@ -63,7 +63,8 @@ const Services = () => {
         setLocation(city);
         setLocationError("");
         setCurrentLatLng({ lat, lng });
-        setMapCenter([lat, lng]); 
+        setMapCenter([lat, lng]);
+        setSelectedServiceId(null);
         // The useEffect hook will detect changes to currentLatLng and activeCategory
         // and trigger fetchNearbyPlaces automatically.
     };
@@ -74,7 +75,8 @@ const Services = () => {
         const { latitude, longitude } = position.coords;
 
         setCurrentLatLng({ lat: latitude, lng: longitude });
-         setMapCenter([latitude, longitude]); 
+        setMapCenter([latitude, longitude]);
+        setSelectedServiceId(null);
 
         try {
             const geoRes = await axios.get(
@@ -125,6 +127,12 @@ const Services = () => {
 
 
 
+    const [selectedServiceId, setSelectedServiceId] = useState(null);
+
+    const handleServiceSelect = (id) => {
+        setSelectedServiceId(prev => prev === id ? null : id);
+    };
+
     return (
         <div className="space-y-8">
             <div className="bg-blue-600 rounded-3xl p-10 text-white flex items-center justify-between overflow-hidden relative shadow-lg">
@@ -143,7 +151,10 @@ const Services = () => {
                     {categories.map(cat => (
                         <button
                             key={cat}
-                            onClick={() => setActiveCategory(cat)}
+                            onClick={() => {
+                                setActiveCategory(cat);
+                                setSelectedServiceId(null);
+                            }}
                             className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === cat
                                 ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
                                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -180,41 +191,57 @@ const Services = () => {
 
             </div>
 
-            {location && (
-                <p className="text-sm text-green-600 font-semibold">
-                    Showing services near: {location}
-                </p>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                {/* Left Side: Services List (1/3) */}
+                <div className="md:col-span-1 space-y-6">
+                    {location && (
+                        <p className="text-sm text-green-600 font-semibold italic">
+                            Showing services near: {location}
+                        </p>
+                    )}
 
-            {locationError && (
-                <p className="text-sm text-red-500 font-semibold">
-                    {locationError}
-                </p>
-            )}
-            
-           <ServiceMap
-                services={filteredServices}
-                center={mapCenter}
-            />
+                    {locationError && (
+                        <p className="text-sm text-red-500 font-semibold bg-red-50 p-3 rounded-xl border border-red-100">
+                            {locationError}
+                        </p>
+                    )}
 
-
-
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredServices.length > 0 ? (
-                        filteredServices.map(service => <ServiceCard key={service._id} service={service} />)
+                    {loading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                        </div>
                     ) : (
-                        <div className="col-span-full py-20 text-center">
-                            <Filter size={48} className="mx-auto text-gray-300 mb-4" />
-                            <h3 className="text-xl font-bold text-gray-400">No services found in this category.</h3>
+                        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+                            {filteredServices.length > 0 ? (
+                                filteredServices.map(service => (
+                                    <div key={service._id} className="transition-all duration-300">
+                                        <ServiceCard
+                                            service={service}
+                                            isSelected={selectedServiceId === service._id}
+                                            onSelect={handleServiceSelect}
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                    <Filter size={40} className="mx-auto text-gray-300 mb-4" />
+                                    <h3 className="text-lg font-bold text-gray-400">No services found.</h3>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
-            )}
+
+                {/* Right Side: Map (2/3) */}
+                <div className="md:col-span-2 sticky top-8">
+                    <ServiceMap
+                        services={filteredServices}
+                        center={mapCenter}
+                        userLocation={currentLatLng}
+                        selectedServiceId={selectedServiceId}
+                    />
+                </div>
+            </div>
         </div>
     );
 };
