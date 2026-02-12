@@ -44,7 +44,7 @@ router.get("/nearby", async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
-    console.log(result.rows);
+    // console.log(result.rows);
     res.json(result.rows);
 
 
