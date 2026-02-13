@@ -83,10 +83,7 @@ const Services = () => {
                 `/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`
             );
 
-            const city =
-                geoRes.data.address.city ||
-                geoRes.data.address.town ||
-                geoRes.data.address.village;
+            const city = geoRes.data.city;
 
             setLocation(city || "Near you");
 
@@ -117,6 +114,7 @@ const Services = () => {
             setFilteredServices(res.data);
         } catch (err) {
             console.error(err);
+            //  setLocation(city || "Near you");
             setLocationError("Failed to load nearby services");
         } finally {
             setLoading(false);

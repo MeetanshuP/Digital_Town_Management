@@ -22,6 +22,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import ServiceProviderRequests from "./pages/admin/ServiceProviderRequests";
 import GrievanceManagement from "./pages/admin/GrievanceManagement";
 import AdminEvents from "./pages/admin/AdminEvents";
+import Profile from "./pages/Profile";
 
 const Approutes = () => {
     const { user } = useAuth();
@@ -46,6 +47,7 @@ const Approutes = () => {
                     <Route path="/grievance" element={<PrivateRoute><Grievance /></PrivateRoute>} />
                     <Route path="/marketplace" element={<PrivateRoute><Marketplace /></PrivateRoute>} />
                     <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />
+                    <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
                     <Route
                         path="/admin"
                         element={

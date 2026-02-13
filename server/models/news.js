@@ -25,7 +25,12 @@ const NewsSchema = new Schema(
       type: String,
       enum: ["active", "inactive", "archived"],
       default: "active"
+    },
+    isEmergency: {
+      type: Boolean,
+      default: false
     }
+
   },
   { timestamps: true }
 );

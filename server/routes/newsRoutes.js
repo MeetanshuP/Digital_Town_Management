@@ -12,10 +12,12 @@ const {
     createNews,
     updateNews,
     deleteNews,
+    getLocationBasedNews,
 } = require("../controllers/newsController");
 
 // Public routes
 router.get("/", getAllNews);
+router.get("/location", getLocationBasedNews);
 router.get("/:id", getNewsById);
 
 // Protected routes (require authentication)

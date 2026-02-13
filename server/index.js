@@ -1,10 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 
-const {connectDB,pool} = require('./config/db');
+const { connectDB, pool } = require('./config/db');
 const morgan = require('morgan');
 
+const cors = require('cors');
 const app = express();
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+
 
 // Middleware
 app.use(express.json());
@@ -37,21 +44,21 @@ app.use("/api/places", require("./routes/places"));
 
 
 app.get('/', (req, res) => {
-    res.status(200).send('API is running');
+  res.status(200).send('API is running');
 });
 
 // Global Error Handler
 
 app.use((err, req, res, next) => {
-    console.error(" Error:", err.message);
-    res.status(err.statusCode || 500).json({
-        success: false,
-        message: err.message || 'Internal Server Error'
-    });
+  console.error(" Error:", err.message);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
 });
 
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port : ${PORT}`);
+  console.log(`Server running on port : ${PORT}`);
 });
