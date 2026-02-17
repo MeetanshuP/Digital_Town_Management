@@ -9,7 +9,7 @@ const AdminEvents = () => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentEventId, setCurrentEventId] = useState(null);
-    
+
     // Form State
     const [formData, setFormData] = useState({
         title: '',
@@ -18,7 +18,7 @@ const AdminEvents = () => {
         eventTime: '',
         status: 'upcoming'
     });
-    
+
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
@@ -66,7 +66,7 @@ const AdminEvents = () => {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this event?")) return;
-        
+
         try {
             const token = sessionStorage.getItem('token');
             await axios.delete(`/api/events/${id}`, {
@@ -87,7 +87,7 @@ const AdminEvents = () => {
         try {
             const token = sessionStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            
+
             if (isEditing) {
                 const res = await axios.put(`/api/events/${currentEventId}`, formData, config);
                 // Update local list
@@ -116,7 +116,7 @@ const AdminEvents = () => {
                 <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <Calendar className="text-purple-600" /> Event Management
                 </h1>
-                <button 
+                <button
                     onClick={openCreateModal}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-700 transition"
                 >
@@ -134,7 +134,6 @@ const AdminEvents = () => {
                                 <th className="p-4 font-semibold text-gray-600">Title</th>
                                 <th className="p-4 font-semibold text-gray-600">Date</th>
                                 <th className="p-4 font-semibold text-gray-600">Status</th>
-                                <th className="p-4 font-semibold text-gray-600">Participants</th>
                                 <th className="p-4 font-semibold text-gray-600 justify-end flex">Actions</th>
                             </tr>
                         </thead>
@@ -142,30 +141,38 @@ const AdminEvents = () => {
                             {events.length > 0 ? (
                                 events.map((event) => (
                                     <tr key={event._id} className="border-b border-gray-50 hover:bg-gray-50 transition">
-                                        <td className="p-4 font-medium text-gray-800">{event.title}</td>
+                                        <td className="p-4 font-medium text-gray-800">
+                                            {event.title}
+                                        </td>
+
                                         <td className="p-4 text-gray-600">
                                             {new Date(event.eventDate).toLocaleDateString()}
                                         </td>
+
                                         <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase
-                                                ${event.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 
-                                                  event.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-xs font-bold uppercase
+                                                    ${event.status === 'upcoming'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : event.status === 'completed'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : 'bg-red-100 text-red-700'
+                                                    }`}
                                             >
                                                 {event.status}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-gray-600">
-                                            {event.participants?.length || 0}
-                                        </td>
+
                                         <td className="p-4 flex gap-2 justify-end">
-                                            <button 
+                                            <button
                                                 onClick={() => openEditModal(event)}
                                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                 title="Edit"
                                             >
                                                 <Edit size={18} />
                                             </button>
-                                            <button 
+
+                                            <button
                                                 onClick={() => handleDelete(event._id)}
                                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                                                 title="Delete"
@@ -177,7 +184,7 @@ const AdminEvents = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="p-8 text-center text-gray-400">
+                                    <td colSpan="4" className="p-8 text-center text-gray-400">
                                         No events found. Create one to get started.
                                     </td>
                                 </tr>
@@ -186,7 +193,6 @@ const AdminEvents = () => {
                     </table>
                 </div>
             )}
-
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -199,21 +205,21 @@ const AdminEvents = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             {error && (
                                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                                     {error}
                                 </div>
                             )}
-                            
+
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                                <input 
-                                    type="text" 
-                                    name="title" 
-                                    value={formData.title} 
-                                    onChange={handleInputChange} 
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleInputChange}
                                     required
                                     className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
                                     placeholder="Enter event title"
@@ -223,22 +229,22 @@ const AdminEvents = () => {
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-                                    <input 
-                                        type="date" 
-                                        name="eventDate" 
-                                        value={formData.eventDate} 
-                                        onChange={handleInputChange} 
+                                    <input
+                                        type="date"
+                                        name="eventDate"
+                                        value={formData.eventDate}
+                                        onChange={handleInputChange}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
                                     />
                                 </div>
                                 <div className="flex-1">
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Time</label>
-                                    <input 
-                                        type="time" 
-                                        name="eventTime" 
-                                        value={formData.eventTime} 
-                                        onChange={handleInputChange} 
+                                    <input
+                                        type="time"
+                                        name="eventTime"
+                                        value={formData.eventTime}
+                                        onChange={handleInputChange}
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
                                     />
@@ -247,9 +253,9 @@ const AdminEvents = () => {
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                                <select 
-                                    name="status" 
-                                    value={formData.status} 
+                                <select
+                                    name="status"
+                                    value={formData.status}
                                     onChange={handleInputChange}
                                     className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
                                 >
@@ -261,10 +267,10 @@ const AdminEvents = () => {
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-                                <textarea 
-                                    name="description" 
-                                    value={formData.description} 
-                                    onChange={handleInputChange} 
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleInputChange}
                                     className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
                                     rows="3"
                                     placeholder="Event details..."
@@ -272,15 +278,15 @@ const AdminEvents = () => {
                             </div>
 
                             <div className="pt-4 flex gap-3">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setShowModal(false)}
                                     className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 font-semibold"
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     disabled={submitting}
                                     className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold disabled:opacity-50"
                                 >

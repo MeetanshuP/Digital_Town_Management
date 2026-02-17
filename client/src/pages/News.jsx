@@ -74,10 +74,10 @@ const News = () => {
 
       {/* ================= CONTENT ================= */}
 
-      {/* 📍 Nearby (Location-based) News */}
+      {/* Nearby (Location-based) News */}
       {view === "nearby" && <LocationNews />}
 
-      {/* 🗂 Local (Admin) News */}
+      {/* Local (Admin) News */}
       {view === "local" && (
         <>
           {loading ? (

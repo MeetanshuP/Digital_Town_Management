@@ -5,7 +5,7 @@ const Event = require("../models/event");
 exports.getAllEvents = async (req, res) => {
     try {
         const events = await Event.find()
-            .sort({ eventDate: 1, eventTime: 1 }); // Sort by event date and time ascending
+            .sort({ eventDate: 1, eventTime: 1 });
 
         return res.status(200).json(events);
     } catch (error) {
@@ -49,7 +49,7 @@ exports.createEvent = async (req, res) => {
 
         const date = new Date(eventDate);
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to start of today
+        today.setHours(0, 0, 0, 0);
 
         if (date < today) {
             return res.status(400).json({
@@ -92,6 +92,7 @@ exports.updateEvent = async (req, res) => {
         if (title) event.title = title;
         if (description) event.description = description;
         if (eventTime) event.eventTime = eventTime;
+
         if (eventDate) {
             const date = new Date(eventDate);
             const today = new Date();
@@ -102,8 +103,10 @@ exports.updateEvent = async (req, res) => {
                     message: "Event date cannot be in the past",
                 });
             }
+
             event.eventDate = eventDate;
         }
+
         if (status) event.status = status;
 
         await event.save();
@@ -134,36 +137,6 @@ exports.deleteEvent = async (req, res) => {
 
         return res.status(200).json({
             message: "Event deleted successfully",
-        });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Server error",
-            error: error.message,
-        });
-    }
-};
-
-/* ================= PARTICIPATE IN EVENT ================= */
-
-exports.participateEvent = async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.id);
-
-        if (!event) {
-            return res.status(404).json({ message: "Event not found" });
-        }
-
-        // Check if user is already participating
-        if (event.participants.includes(req.user.id)) {
-            return res.status(400).json({ message: "You have already joined this event" });
-        }
-
-        event.participants.push(req.user.id);
-        await event.save();
-
-        return res.status(200).json({
-            message: "Successfully joined the event",
-            event,
         });
     } catch (error) {
         return res.status(500).json({

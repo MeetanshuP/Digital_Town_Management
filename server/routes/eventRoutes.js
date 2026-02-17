@@ -10,14 +10,16 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
-    participateEvent,
 } = require("../controllers/eventController");
+
+const { getNearbyEvents } = require("../controllers/externalEventsController");
+
+router.post("/nearby", getNearbyEvents);
 
 router.get("/", getAllEvents);
 router.get("/:id", getEventById);
 router.post("/", authMiddleware, isAdmin, createEvent);
 router.put("/:id", authMiddleware, isAdmin, updateEvent);
 router.delete("/:id", authMiddleware, isAdmin, deleteEvent);
-router.post("/:id/participate", authMiddleware, participateEvent);
 
 module.exports = router;
