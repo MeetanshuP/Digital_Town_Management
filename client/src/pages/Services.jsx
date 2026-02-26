@@ -116,6 +116,24 @@ const Services = () => {
 
     const [selectedServiceId, setSelectedServiceId] = useState(null);
 
+    const handleManualLocationChange = async (newLatLng) => {
+        const { lat, lng } = newLatLng;
+        setCurrentLatLng({ lat, lng });
+        setMapCenter([lat, lng]);
+        setSelectedServiceId(null);
+
+        try {
+            const geoRes = await axios.get(
+                `/api/location/reverse-geocode?lat=${lat}&lon=${lng}`
+            );
+            const city = geoRes.data.city;
+            setLocation(city || "Selected location");
+        } catch (err) {
+            console.error("Manual location change geocode error:", err);
+            setLocation("Selected location");
+        }
+    };
+
     const handleServiceSelect = (id) => {
         setSelectedServiceId(prev => prev === id ? null : id);
     };
@@ -226,6 +244,7 @@ const Services = () => {
                         center={mapCenter}
                         userLocation={currentLatLng}
                         selectedServiceId={selectedServiceId}
+                        onUserLocationChange={handleManualLocationChange}
                     />
                 </div>
             </div>

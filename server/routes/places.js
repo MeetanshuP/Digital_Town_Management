@@ -34,7 +34,7 @@ router.get("/nearby", async (req, res) => {
       AND ($4::text IS NULL OR category = $4)
       AND ($5::text IS NULL OR type = $5)
       ORDER BY distance
-      LIMIT 100;
+      LIMIT 500;
     `;
 
     const values = [
