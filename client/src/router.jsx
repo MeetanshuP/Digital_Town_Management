@@ -3,9 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
 
-
-
-//importing components
+// importing components
 import Navbar from "./components/Navbar";
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -16,7 +14,6 @@ import BecomeServiceProvider from './pages/BecomeServiceProvider';
 import Grievance from './pages/Grievance';
 import Marketplace from './pages/Marketplace';
 import Events from './pages/Events';
-
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ServiceProviderRequests from "./pages/admin/ServiceProviderRequests";

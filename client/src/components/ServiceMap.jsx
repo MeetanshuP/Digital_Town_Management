@@ -1,5 +1,5 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import { useMap } from "react-leaflet";
 
 import L from "leaflet";
@@ -17,11 +17,22 @@ L.Icon.Default.mergeOptions({
 
 const ChangeView = ({ center }) => {
   const map = useMap();
-  map.setView(center, 13);
+  React.useEffect(() => {
+    map.setView(center, 13);
+  }, [center, map]);
   return null;
 };
 
-const ServiceMap = ({ services, center, userLocation, selectedServiceId }) => {
+const MapEvents = ({ onMapClick }) => {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng);
+    },
+  });
+  return null;
+};
+
+const ServiceMap = ({ services, center, userLocation, selectedServiceId, onUserLocationChange }) => {
   const map = useMap();
   const markerRefs = React.useRef({});
 
@@ -54,15 +65,29 @@ const ServiceMap = ({ services, center, userLocation, selectedServiceId }) => {
   return (
     <>
       <ChangeView center={center} />
+      <MapEvents onMapClick={onUserLocationChange} />
       <TileLayer
         attribution='© OpenStreetMap contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
       {userLocation && (
-        <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+        <Marker
+          position={[userLocation.lat, userLocation.lng]}
+          icon={userIcon}
+          draggable={true}
+          eventHandlers={{
+            dragend: (e) => {
+              const marker = e.target;
+              const position = marker.getLatLng();
+              onUserLocationChange(position);
+            },
+          }}
+        >
           <Popup>
             <strong>Your Location</strong>
+            <br />
+            Drag me or click map to change site.
           </Popup>
         </Marker>
       )}
