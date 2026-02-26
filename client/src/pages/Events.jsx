@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 import EventCard from '../components/EventCard';
 import NearbyEvents from '../components/NearbyEvents';
 import { Calendar, Plus } from 'lucide-react';
@@ -30,7 +30,7 @@ const Events = () => {
 
     const fetchEvents = async () => {
         try {
-            const res = await axios.get('/api/events');
+            const res = await axios.get('/events');
             setEvents(res.data);
         } catch (err) {
             console.error(err);
@@ -56,7 +56,7 @@ const Events = () => {
                 return;
             }
 
-            await axios.post('/api/events', formData, {
+            await axios.post('/events', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

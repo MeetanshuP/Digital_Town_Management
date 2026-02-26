@@ -1,13 +1,34 @@
 const Event = require("../models/event");
 
 /* ================= GET ALL EVENTS ================= */
-
 exports.getAllEvents = async (req, res) => {
     try {
         const events = await Event.find()
             .sort({ eventDate: 1, eventTime: 1 });
 
-        return res.status(200).json(events);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+        // Update status for past events
+        const updatedEvents = await Promise.all(
+            events.map(async (event) => {
+                const eventDate = new Date(event.eventDate);
+                eventDate.setHours(0, 0, 0, 0);
+
+                if (
+                    event.status === "upcoming" &&
+                    eventDate < today
+                ) {
+                    event.status = "completed";
+                    await event.save();
+                }
+
+                return event;
+            })
+        );
+
+        return res.status(200).json(updatedEvents);
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -17,7 +38,6 @@ exports.getAllEvents = async (req, res) => {
 };
 
 /* ================= GET EVENT BY ID ================= */
-
 exports.getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id);
@@ -26,7 +46,22 @@ exports.getEventById = async (req, res) => {
             return res.status(404).json({ message: "Event not found" });
         }
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const eventDate = new Date(event.eventDate);
+        eventDate.setHours(0, 0, 0, 0);
+
+        if (
+            event.status === "upcoming" &&
+            eventDate < today
+        ) {
+            event.status = "completed";
+            await event.save();
+        }
+
         return res.status(200).json(event);
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",

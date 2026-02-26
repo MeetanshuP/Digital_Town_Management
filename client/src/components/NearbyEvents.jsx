@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../utils/axiosInstance";
 import { MapPin, ExternalLink } from "lucide-react";
 
 const NearbyEvents = () => {
@@ -10,7 +10,7 @@ const NearbyEvents = () => {
     useEffect(() => {
         const fetchNearbyEvents = async (lat, lng) => {
             try {
-                const res = await axios.post("/api/events/nearby", {
+                const res = await axios.post("/events/nearby", {
                     lat,
                     lng
                 });

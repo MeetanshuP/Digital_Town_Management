@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../utils/axiosInstance";
 
 const ServiceProviderRequests = () => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
-    
+
     const token = sessionStorage.getItem('token');
-    axios.get("/api/admin/service-providers", {
+    axios.get("/admin/service-providers", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      
+
     })
       .then(res => setRequests(res.data))
       .catch(console.error);
@@ -19,7 +19,7 @@ const ServiceProviderRequests = () => {
 
   const handleAction = async (id, action) => {
     const token = sessionStorage.getItem('token');
-    await axios.patch(`/api/admin/service-providers/${id}`, { action }, {
+    await axios.patch(`/admin/service-providers/${id}`, { action }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

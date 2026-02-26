@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import axios from "../utils/axiosInstance";
 
 const Login = () => {
     const { login, user } = useAuth();
@@ -11,13 +11,13 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-    if (user) {
-        if (user.role === 'admin') {
-            navigate('/admin');
-        } else {
-            navigate('/');
+        if (user) {
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         }
-    }
     }, [user, navigate]);
 
 
@@ -27,7 +27,7 @@ const Login = () => {
         e.preventDefault();
         setError('');
         try {
-            const res = await axios.post('/api/auth/login', formData);
+            const res = await axios.post('/auth/login', formData);
             login(res.data.user, res.data.token);
             // navigate('/');
         } catch (err) {

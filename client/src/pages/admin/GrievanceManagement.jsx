@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../utils/axiosInstance";
 
 const GrievanceManagement = () => {
   const [grievances, setGrievances] = useState([]);
@@ -8,7 +8,7 @@ const GrievanceManagement = () => {
     const fetchGrievances = async () => {
       try {
         const token = sessionStorage.getItem('token');
-        const res = await axios.get("/api/admin/grievances", {
+        const res = await axios.get("/admin/grievances", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -23,7 +23,7 @@ const GrievanceManagement = () => {
 
   const updateStatus = async (id, status) => {
     const token = sessionStorage.getItem('token');
-    await axios.patch(`/api/admin/grievances/${id}`, { status }, {
+    await axios.patch(`/admin/grievances/${id}`, { status }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

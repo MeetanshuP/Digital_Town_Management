@@ -1,11 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isSellerMode, setIsSellerMode] = useState(false);
 
     useEffect(() => {
         const token = sessionStorage.getItem('token');
@@ -17,16 +18,23 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
+    const toggleSellerMode = () => {
+        setIsSellerMode(prev => !prev);
+    };
+
     const fetchProfile = async (token) => {
         try {
-            const res = await axios.get('/api/auth/profile', {
+            const res = await axios.get('/auth/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser({
                 ...res.data,
-                role: res.data.role || 'USER',
+                role: res.data.role || 'user',
                 serviceProviderStatus: res.data.serviceProviderStatus || 'NONE',
+                sellerStatus: res.data.sellerStatus || 'none',
+                roles: res.data.roles || [],
             });
+
         } catch (err) {
             sessionStorage.removeItem('token');
             setUser(null);
@@ -39,9 +47,12 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem('token', token);
         setUser({
             ...userData,
-            role: userData.role || 'USER',
+            role: userData.role || 'user',
             serviceProviderStatus: userData.serviceProviderStatus || 'NONE',
+            sellerStatus: userData.sellerStatus || 'none',
+            roles: userData.roles || [],
         });
+
     };
 
     const logout = () => {
@@ -49,12 +60,11 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-
-   const applyForServiceProvider = async (formData) => {
+    const applyForServiceProvider = async (formData) => {
         const token = sessionStorage.getItem('token');
 
         const res = await axios.post(
-            '/api/service-provider/apply',
+            '/service-provider/apply',
             formData,
             {
                 headers: {
@@ -71,9 +81,17 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     };
 
-
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, applyForServiceProvider }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            logout,
+            applyForServiceProvider,
+            isSellerMode,
+            toggleSellerMode
+        }}>
+
             {children}
         </AuthContext.Provider>
     );

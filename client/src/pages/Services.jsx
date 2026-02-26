@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 import ServiceCard from '../components/ServiceCard';
 import { Search, Filter, PhoneCall } from 'lucide-react';
 import ServiceMap from '../components/ServiceMap';
@@ -54,8 +54,6 @@ const Services = () => {
         );
     }, [activeCategory, currentLatLng]);
 
-
-
     const handleCitySelect = (city) => {
         if (!CITY_COORDS[city]) return;
 
@@ -65,11 +63,7 @@ const Services = () => {
         setCurrentLatLng({ lat, lng });
         setMapCenter([lat, lng]);
         setSelectedServiceId(null);
-        // The useEffect hook will detect changes to currentLatLng and activeCategory
-        // and trigger fetchNearbyPlaces automatically.
     };
-
-
 
     const successLocation = async (position) => {
         const { latitude, longitude } = position.coords;
@@ -80,7 +74,7 @@ const Services = () => {
 
         try {
             const geoRes = await axios.get(
-                `/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`
+                `/location/reverse-geocode?lat=${latitude}&lon=${longitude}`
             );
 
             const city = geoRes.data.city;
@@ -93,7 +87,6 @@ const Services = () => {
         }
     };
 
-
     const errorLocation = () => {
         setLocationError("Location permission denied. Please select city manually.");
     };
@@ -101,7 +94,7 @@ const Services = () => {
     const fetchNearbyPlaces = async (lat, lng, category = null) => {
         setLoading(true);
         try {
-            const res = await axios.get("/api/places/nearby", {
+            const res = await axios.get("/places/nearby", {
                 params: {
                     lat,
                     lng,
@@ -120,10 +113,6 @@ const Services = () => {
             setLoading(false);
         }
     };
-
-
-
-
 
     const [selectedServiceId, setSelectedServiceId] = useState(null);
 

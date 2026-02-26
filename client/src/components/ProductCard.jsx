@@ -1,38 +1,57 @@
-import React from 'react';
-import { ShoppingCart, User, Tag } from 'lucide-react';
+const ProductCard = ({ product, quantity, onIncrease, onDecrease }) => {
+    const isOutOfStock = product.availability === "out_of_stock";
 
-const ProductCard = ({ product }) => {
     return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-            <div className="h-48 bg-gray-100 relative overflow-hidden">
-                <img
-                    src={product.images?.[0] || 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-700 rounded-full text-xs font-bold shadow-sm">
-                        {product.category}
+        <div
+            className={`rounded-xl shadow p-4 transition ${isOutOfStock
+                    ? "bg-gray-100 opacity-70"
+                    : "bg-white hover:shadow-lg"
+                }`}
+        >
+            <img
+                src={product.image?.url}
+                alt={product.title}
+                className="h-40 w-full object-cover rounded mb-4"
+            />
+
+            <h3 className="font-semibold text-lg">{product.title}</h3>
+
+            <p className="text-gray-600 mb-4">₹{product.price}</p>
+
+            {isOutOfStock ? (
+                <div className="mt-2">
+                    <span className="text-red-600 font-semibold">
+                        Out of Stock
                     </span>
                 </div>
-            </div>
+            ) : quantity > 0 ? (
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onDecrease}
+                        className="bg-gray-200 px-3 py-1 rounded text-lg font-bold"
+                    >
+                        -
+                    </button>
 
-            <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-800 mb-1">{product.name}</h3>
-                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{product.description}</p>
+                    <span className="font-semibold text-lg">
+                        {quantity}
+                    </span>
 
-                <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-black text-green-700">₹{product.price}</span>
-                    <div className="flex items-center text-gray-400 text-xs">
-                        <User size={14} className="mr-1" />
-                        {product.seller?.name || 'Local Seller'}
-                    </div>
+                    <button
+                        onClick={onIncrease}
+                        className="bg-purple-600 text-white px-3 py-1 rounded text-lg font-bold"
+                    >
+                        +
+                    </button>
                 </div>
-
-                <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-100">
-                    <ShoppingCart size={18} /> Contact Seller
+            ) : (
+                <button
+                    onClick={onIncrease}
+                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+                >
+                    Add to Cart
                 </button>
-            </div>
+            )}
         </div>
     );
 };

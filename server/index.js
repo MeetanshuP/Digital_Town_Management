@@ -41,7 +41,7 @@ app.use("/api/admin", require("./routes/adminServiceProviderRoutes"));
 app.use("/api/admin", require("./routes/adminGrievanceRoutes"));
 app.use("/api/location", require("./routes/location"));
 app.use("/api/places", require("./routes/places"));
-
+app.use("/api/seller", require("./routes/sellerRoutes"));
 
 app.get('/', (req, res) => {
   res.status(200).send('API is running');

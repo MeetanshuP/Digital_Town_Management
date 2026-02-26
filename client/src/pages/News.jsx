@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import NewsCard from "../components/NewsCard";
 import LocationNews from "../components/LocationNews";
 import { Newspaper, Bell, MapPin } from "lucide-react";
+import axios from "../utils/axiosInstance";
 
 const News = () => {
   const [news, setNews] = useState([]);
@@ -16,7 +16,7 @@ const News = () => {
 
     const fetchNews = async () => {
       try {
-        const res = await axios.get("/api/news");
+        const res = await axios.get("/news");
         setNews(res.data);
       } catch (err) {
         console.error(err);
@@ -42,22 +42,20 @@ const News = () => {
           <div className="mt-6 flex gap-4">
             <button
               onClick={() => setView("local")}
-              className={`px-5 py-2 rounded-full font-semibold ${
-                view === "local"
-                  ? "bg-white text-green-700"
-                  : "bg-white/20 text-white"
-              }`}
+              className={`px-5 py-2 rounded-full font-semibold ${view === "local"
+                ? "bg-white text-green-700"
+                : "bg-white/20 text-white"
+                }`}
             >
               Local News
             </button>
 
             <button
               onClick={() => setView("nearby")}
-              className={`px-5 py-2 rounded-full font-semibold flex items-center gap-2 ${
-                view === "nearby"
-                  ? "bg-white text-green-700"
-                  : "bg-white/20 text-white"
-              }`}
+              className={`px-5 py-2 rounded-full font-semibold flex items-center gap-2 ${view === "nearby"
+                ? "bg-white text-green-700"
+                : "bg-white/20 text-white"
+                }`}
             >
               <MapPin size={16} />
               Nearby News

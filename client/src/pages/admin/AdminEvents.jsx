@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "../../utils/axiosInstance";
 import { Plus, Edit, Trash2, Calendar, X } from 'lucide-react';
 
 const AdminEvents = () => {
@@ -24,7 +23,7 @@ const AdminEvents = () => {
 
     const fetchEvents = async () => {
         try {
-            const res = await axios.get('/api/events');
+            const res = await axios.get('/events');
             setEvents(res.data);
             setLoading(false);
         } catch (err) {
@@ -69,7 +68,7 @@ const AdminEvents = () => {
 
         try {
             const token = sessionStorage.getItem('token');
-            await axios.delete(`/api/events/${id}`, {
+            await axios.delete(`/events/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvents(events.filter(e => e._id !== id));
@@ -89,12 +88,12 @@ const AdminEvents = () => {
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
             if (isEditing) {
-                const res = await axios.put(`/api/events/${currentEventId}`, formData, config);
+                const res = await axios.put(`/events/${currentEventId}`, formData, config);
                 // Update local list
                 setEvents(events.map(e => e._id === currentEventId ? res.data.event : e));
                 alert("Event updated successfully!");
             } else {
-                const res = await axios.post('/api/events', formData, config);
+                const res = await axios.post('/events', formData, config);
                 // Add to local list
                 setEvents([...events, res.data.event]);
                 alert("Event created successfully!");

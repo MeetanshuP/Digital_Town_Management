@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, MessageSquare, LogOut, Calendar } from "lucide-react";
+import { LayoutDashboard, Users, MessageSquare, LogOut, Calendar, Store } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const AdminSidebar = () => {
@@ -16,6 +16,10 @@ const AdminSidebar = () => {
 
         <NavLink to="/admin/service-providers" className="block p-2 rounded hover:bg-green-50">
           <Users size={18} /> Service Providers
+        </NavLink>
+
+        <NavLink to="/admin/seller-requests" className="block p-2 rounded hover:bg-green-50">
+          <Store size={18} /> Seller Requests
         </NavLink>
 
         <NavLink to="/admin/grievances" className="block p-2 rounded hover:bg-green-50">

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, MapPin, ArrowRight, ShieldPlus } from 'lucide-react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
         firstName: '',
-        lastName:'',
+        lastName: '',
         email: '',
         password: '',
         contactNumber: '',
@@ -22,8 +22,8 @@ const Register = () => {
         e.preventDefault();
         setError('');
         try {
-          
-            const res = await axios.post('/api/auth/register', formData);
+
+            const res = await axios.post('/auth/register', formData);
             navigate('/login');
         } catch (err) {
             console.log(err);
@@ -56,12 +56,12 @@ const Register = () => {
                                     value={formData.firstName}
                                     onChange={onChange}
                                     className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition-all"
-                                   
+
                                     required
                                 />
                             </div>
                         </div>
-                         <div>
+                        <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
                             <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -71,7 +71,7 @@ const Register = () => {
                                     value={formData.lastName}
                                     onChange={onChange}
                                     className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition-all"
-                                   
+
                                     required
                                 />
                             </div>
@@ -86,7 +86,7 @@ const Register = () => {
                                     value={formData.contactNumber}
                                     onChange={onChange}
                                     className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition-all"
-                                  
+
                                     required
                                 />
                             </div>

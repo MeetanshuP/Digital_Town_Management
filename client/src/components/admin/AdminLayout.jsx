@@ -15,8 +15,8 @@ const AdminLayout = () => {
         <main className="flex-1 p-6 overflow-y-auto">
           {!isDashboard && (
             <div className="mb-6">
-              <Link 
-                to="/admin" 
+              <Link
+                to="/admin"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium"
               >
                 <ArrowLeft size={20} className="mr-2" />
@@ -24,6 +24,7 @@ const AdminLayout = () => {
               </Link>
             </div>
           )}
+
           <Outlet />
         </main>
       </div>

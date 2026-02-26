@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 import { MessageSquare, Send, CheckCircle, Clock, AlertCircle, Camera } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
 
@@ -38,7 +38,7 @@ const Grievance = () => {
             setSuccess('Grievance submitted successfully!');
             setFormData({ subject: '', message: '', category: 'general' });
             // Refresh grievances list
-            const updatedRes = await axios.get('/api/grievances', {
+            const updatedRes = await axios.get('/grievances', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGrievances(updatedRes.data);
@@ -54,7 +54,7 @@ const Grievance = () => {
             try {
                 const token = sessionStorage.getItem('token');
                 if (!token) return setLoading(false);
-                const res = await axios.get('/api/grievances', {
+                const res = await axios.get('/grievances', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setGrievances(res.data);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from "../utils/axiosInstance";
 import { motion } from 'framer-motion';
 import { ArrowRight, Newspaper, MapPin, Sprout, MessageSquare, ShoppingBag, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -10,7 +10,7 @@ const Home = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const res = await axios.get('/api/events');
+                const res = await axios.get('/events');
                 // Filter upcoming events and take top 2
                 const upcoming = res.data
                     .filter(e => new Date(e.eventDate) >= new Date())
@@ -95,7 +95,7 @@ const Home = () => {
                                 <div className="text-center md:text-left flex-1">
                                     <h3 className="text-2xl font-bold mb-2 text-gray-800">{feature.title}</h3>
                                     <p className="text-gray-600 text-lg mb-4">Access detailed information and services for {feature.title.toLowerCase()} in your village.</p>
-                                    
+
                                     {/* Recent Events Preview */}
                                     {feature.title === 'Events' && recentEvents.length > 0 && (
                                         <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 mb-2">
@@ -117,7 +117,7 @@ const Home = () => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center justify-center h-full">
                                 <Link to={feature.path} className="text-white bg-gray-900 hover:bg-gray-800 px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all">
                                     Explore <ArrowRight size={20} />

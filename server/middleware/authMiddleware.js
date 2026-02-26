@@ -1,6 +1,7 @@
 const { verifyToken } = require("../utils/jwt");
+const User = require("../models/user");
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -11,14 +12,17 @@ const authMiddleware = (req, res, next) => {
         const token = authHeader.split(" ")[1];
         const decoded = verifyToken(token);
 
-        if (!decoded || !decoded.role) {
+        if (!decoded || !decoded.id) {
             return res.status(401).json({ message: "Invalid token payload" });
         }
 
-        req.user = {
-            id: decoded.id,
-            role: decoded.role,
-        };
+        const user = await User.findById(decoded.id).select("-password");
+
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+
+        req.user = user;
 
         next();
     } catch (error) {

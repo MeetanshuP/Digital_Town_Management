@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "../utils/axiosInstance";
 import { Camera, Loader2 } from "lucide-react";
 
 const ImageUpload = ({ onUpload }) => {
@@ -24,7 +24,7 @@ const ImageUpload = ({ onUpload }) => {
     setLoading(true);
     try {
       const token = sessionStorage.getItem('token');
-      const res = await axios.post("/api/upload/image", formData, {
+      const res = await axios.post("/upload/image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`
