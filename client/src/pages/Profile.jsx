@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, LogOut, ShieldCheck, Briefcase } from 'lucide-react';
+import toast from "react-hot-toast";
 import axios from '../utils/axiosInstance';
 
 const Profile = () => {
@@ -14,13 +15,23 @@ const Profile = () => {
         navigate('/login');
     };
 
+    const { refreshUser } = useAuth();
+
     const handleApplySeller = async () => {
         try {
+            toast.loading("Submitting application...", { id: "sellerApply" });
+
             await axios.post('/seller/apply');
-            alert('Seller application submitted');
-            window.location.reload(); // refresh user state
+
+            await refreshUser();
+
+            toast.success("Seller application submitted!", { id: "sellerApply" });
+
         } catch (err) {
-            alert(err.response?.data?.message || 'Error applying for seller');
+            toast.error(
+                err.response?.data?.message || "Error applying for seller",
+                { id: "sellerApply" }
+            );
         }
     };
     const handleToggleSeller = () => {

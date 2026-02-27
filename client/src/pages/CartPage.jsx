@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../utils/axiosInstance";
+import toast from "react-hot-toast";
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
@@ -14,9 +15,21 @@ const CartPage = () => {
     };
 
     const placeOrder = async () => {
-        await axios.post("/marketplace/orders");
-        alert("Order placed");
-        fetchCart();
+        try {
+            toast.loading("Placing order...", { id: "placeOrder" });
+
+            await axios.post("/marketplace/orders");
+
+            await fetchCart();
+            await fetchProducts();
+
+            toast.success("Order placed successfully!", { id: "placeOrder" });
+        } catch (err) {
+            toast.error(
+                err.response?.data?.message || "Failed to place order",
+                { id: "placeOrder" }
+            );
+        }
     };
 
     return (

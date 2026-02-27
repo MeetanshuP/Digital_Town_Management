@@ -124,7 +124,7 @@ const Services = () => {
 
         try {
             const geoRes = await axios.get(
-                `/api/location/reverse-geocode?lat=${lat}&lon=${lng}`
+                `/location/reverse-geocode?lat=${lat}&lon=${lng}`
             );
             const city = geoRes.data.city;
             setLocation(city || "Selected location");

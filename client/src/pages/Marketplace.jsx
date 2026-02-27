@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "../utils/axiosInstance";
 import ProductCard from "../components/ProductCard";
+import toast from "react-hot-toast";
 
 const MarketplaceHome = () => {
     const [products, setProducts] = useState([]);
@@ -70,12 +71,19 @@ const MarketplaceHome = () => {
 
     const placeOrder = async () => {
         try {
+            toast.loading("Placing order...", { id: "placeOrder" });
+
             await axios.post("/marketplace/orders");
+
             await fetchCart();
             await fetchProducts();
-            alert("Order placed successfully!");
+
+            toast.success("Order placed successfully!", { id: "placeOrder" });
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to place order");
+            toast.error(
+                err.response?.data?.message || "Failed to place order",
+                { id: "placeOrder" }
+            );
         }
     };
 

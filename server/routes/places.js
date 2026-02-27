@@ -6,7 +6,7 @@ router.get("/nearby", async (req, res) => {
   try {
     const { lat, lng, radius = 5000, category, type } = req.query;
 
-    // 🔴 validation
+    // validation
     if (!lat || !lng) {
       return res.status(400).json({ error: "lat and lng are required" });
     }
