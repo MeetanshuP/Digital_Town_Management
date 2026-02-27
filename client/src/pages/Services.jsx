@@ -10,6 +10,7 @@ const CITY_COORDS = {
     Surat: { lat: 21.1702, lng: 72.8311 }
 };
 
+
 const Services = () => {
     const [services, setServices] = useState([]);
     const [filteredServices, setFilteredServices] = useState([]);
@@ -98,7 +99,7 @@ const Services = () => {
                 params: {
                     lat,
                     lng,
-                    radius: 5000,
+                    radius: 50000,
                     category: category !== "All" ? category : null
                 }
             });
