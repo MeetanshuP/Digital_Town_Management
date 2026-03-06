@@ -4,6 +4,7 @@ const router = express.Router();
 // Middlewares
 const authMiddleware = require("../middleware/authMiddleware");
 const { isAdmin } = require("../middleware/rbacMiddleware");
+const upload = require("../middleware/upload");
 
 // Controllers
 const {
@@ -20,9 +21,9 @@ router.get("/", getAllNews);
 router.get("/location", getLocationBasedNews);
 router.get("/:id", getNewsById);
 
-// Protected routes (require authentication)
-router.post("/", authMiddleware, isAdmin, createNews);
-router.put("/:id", authMiddleware, isAdmin, updateNews);
+// Admin routes
+router.post("/", authMiddleware, isAdmin, upload.single("image"), createNews);
+router.put("/:id", authMiddleware, isAdmin, upload.single("image"), updateNews);
 router.delete("/:id", authMiddleware, isAdmin, deleteNews);
 
 module.exports = router;

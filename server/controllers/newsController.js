@@ -1,13 +1,14 @@
 const News = require("../models/news");
+const cloudinary = require("../config/cloudinary");
+const streamifier = require("streamifier");
 
-/* ================= GET ALL NEWS ================= */
+/* ================= GET ALL LOCAL NEWS ================= */
 
 exports.getAllNews = async (req, res) => {
     try {
-        const news = await News.find({ status: "active" })
+        const news = await News.find()
             .populate("postedBy", "firstName lastName email")
-            // Emergency news first, then latest
-            .sort({ isEmergency: -1, createdAt: -1 });
+            .sort({ createdAt: -1 });
 
         return res.status(200).json(news);
     } catch (error) {
@@ -38,11 +39,11 @@ exports.getNewsById = async (req, res) => {
     }
 };
 
-/* ================= CREATE NEWS ================= */
+/* ================= CREATE NEWS (ADMIN) ================= */
 
 exports.createNews = async (req, res) => {
     try {
-        const { title, description, category, isEmergency } = req.body;
+        const { title, description } = req.body;
 
         if (!title || !description) {
             return res.status(400).json({
@@ -50,11 +51,33 @@ exports.createNews = async (req, res) => {
             });
         }
 
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Image is required",
+            });
+        }
+
+        // Upload image to Cloudinary
+        const uploadFromBuffer = () => {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    { folder: "news" },
+                    (error, result) => {
+                        if (result) resolve(result);
+                        else reject(error);
+                    }
+                );
+
+                streamifier.createReadStream(req.file.buffer).pipe(stream);
+            });
+        };
+
+        const result = await uploadFromBuffer();
+
         const news = await News.create({
             title,
             description,
-            category: category || "general",
-            isEmergency: isEmergency || false, // 🚨
+            image: result.secure_url,
             postedBy: req.user.id,
         });
 
@@ -62,6 +85,7 @@ exports.createNews = async (req, res) => {
             message: "News created successfully",
             news,
         });
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -74,7 +98,7 @@ exports.createNews = async (req, res) => {
 
 exports.updateNews = async (req, res) => {
     try {
-        const { title, description, category, status, isEmergency } = req.body;
+        const { title, description } = req.body;
 
         const news = await News.findById(req.params.id);
 
@@ -82,14 +106,29 @@ exports.updateNews = async (req, res) => {
             return res.status(404).json({ message: "News not found" });
         }
 
+        // Update title and description
         if (title) news.title = title;
         if (description) news.description = description;
-        if (category) news.category = category;
-        if (status) news.status = status;
 
-        // Emergency toggle
-        if (isEmergency !== undefined) {
-            news.isEmergency = isEmergency;
+        // If new image uploaded → upload to Cloudinary
+        if (req.file) {
+
+            const uploadFromBuffer = () => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: "news" },
+                        (error, result) => {
+                            if (result) resolve(result);
+                            else reject(error);
+                        }
+                    );
+
+                    streamifier.createReadStream(req.file.buffer).pipe(stream);
+                });
+            };
+
+            const result = await uploadFromBuffer();
+            news.image = result.secure_url;
         }
 
         await news.save();
@@ -98,6 +137,7 @@ exports.updateNews = async (req, res) => {
             message: "News updated successfully",
             news,
         });
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -121,6 +161,7 @@ exports.deleteNews = async (req, res) => {
         return res.status(200).json({
             message: "News deleted successfully",
         });
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -154,7 +195,6 @@ exports.getLocationBasedNews = async (req, res) => {
             });
         }
 
-        // 1️⃣ Resolve location
         const location = await getLocationFromCoordinates(lat, lon);
 
         if (!location.state) {
@@ -163,7 +203,6 @@ exports.getLocationBasedNews = async (req, res) => {
             });
         }
 
-        // 2️⃣ Cache key
         const cacheKey = `news:${location.state}:${location.city || "NA"}:${category}`;
 
         const cachedNews = getCache(cacheKey);
@@ -177,14 +216,12 @@ exports.getLocationBasedNews = async (req, res) => {
             });
         }
 
-        // 3️⃣ Fetch from external API
         const news = await fetchNewsByLocationAndCategory({
             state: location.state,
             city: location.city,
             category,
         });
 
-        // 4️⃣ Cache for 15 minutes
         setCache(cacheKey, news, 900);
 
         return res.status(200).json({
