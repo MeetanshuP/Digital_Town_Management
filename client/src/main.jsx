@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// in main.jsx or App.jsx
+
 import "leaflet/dist/leaflet.css";
 
 import './index.css'

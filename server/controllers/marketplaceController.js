@@ -4,6 +4,8 @@ const Order = require("../models/order");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 
+/*******************************
+
 // PRODUCT SECTION //
 
 // Seller: Add Product
@@ -94,6 +96,9 @@ exports.updateAvailability = async (req, res) => {
     }
 };
 
+**************************************************/
+
+/**************************************************
 // CART SECTION //
 
 // Add to Cart
@@ -150,6 +155,7 @@ exports.getCart = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+ 
 
 // Remove From Cart
 exports.removeFromCart = async (req, res) => {
@@ -173,7 +179,9 @@ exports.removeFromCart = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+***************************************************************/
 
+/************************************************
 // ORDER SECTION //
 
 // Place Order
@@ -474,3 +482,4 @@ exports.deleteProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+**********************************************************/

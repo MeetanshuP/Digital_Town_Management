@@ -15,7 +15,7 @@ import Marketplace from "./pages/Marketplace";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 
-import SellerDashboard from "./pages/SellerDashboard";
+// import SellerDashboard from "./pages/SellerDashboard";
 
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
@@ -54,7 +54,7 @@ const Approutes = () => {
                     <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
                     {/* Seller Route */}
-                    <Route path="/seller" element={<PrivateRoute> <SellerDashboard /> </PrivateRoute>} />
+                    {/* <Route path="/seller" element={<PrivateRoute> <SellerDashboard /> </PrivateRoute>} /> */}
 
                     {/* Admin Routes */}
                     <Route path="/admin" element={<PrivateRoute role="admin"> <AdminLayout /> </PrivateRoute>}>
