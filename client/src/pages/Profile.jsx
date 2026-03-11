@@ -2,13 +2,10 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, LogOut, ShieldCheck, Briefcase } from 'lucide-react';
-import toast from "react-hot-toast";
 import axios from '../utils/axiosInstance';
 
 const Profile = () => {
 
-    // Removed temporarily
-    // isSellerMode, toggleSellerMode
     const { user, logout } = useAuth();
 
     const navigate = useNavigate();
@@ -19,51 +16,6 @@ const Profile = () => {
     };
 
     const { refreshUser } = useAuth();
-
-    // const handleApplySeller = async () => {
-    //     try {
-    //         toast.loading("Submitting application...", { id: "sellerApply" });
-
-    //         await axios.post('/seller/apply');
-
-    //         await refreshUser();
-
-    //         toast.success("Seller application submitted!", { id: "sellerApply" });
-
-    //     } catch (err) {
-    //         toast.error(
-    //             err.response?.data?.message || "Error applying for seller",
-    //             { id: "sellerApply" }
-    //         );
-    //     }
-    // };
-
-    // const handleToggleSeller = () => {
-    //     if (!isSellerMode) {
-    //         toggleSellerMode();
-    //         navigate("/seller");
-    //     } else {
-    //         toggleSellerMode();
-    //         navigate("/");
-    //     }
-    // };
-
-    {/* Seller Toggle */ }
-    // {
-    //     user.sellerStatus === "approved" && (
-    // <button
-    //     onClick={handleToggleSeller}
-    //     className={`w-full px-6 py-3 rounded-xl font-medium transition ${isSellerMode
-    //         ? "bg-gray-200 text-gray-800"
-    //         : "bg-purple-600 text-white hover:bg-purple-700"
-    //         }`}
-    // >
-    //     {isSellerMode
-    //         ? "Switch to Buyer Mode"
-    //         : "Switch to Seller Dashboard"}
-    // </button>
-    // )
-    // }
 
     if (!user) {
         return (
@@ -104,12 +56,6 @@ const Profile = () => {
                             </span>
                         )}
 
-                        {/* {user.roles?.includes('seller') && (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                🛒 Seller
-                            </span>
-                        )} */}
-
                         {user.serviceProviderStatus === 'APPROVED' && (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                 <Briefcase size={16} /> Service Provider
@@ -133,43 +79,6 @@ const Profile = () => {
                                 ⏳ Service Provider Application Under Review
                             </div>
                         )}
-
-                        {/* Seller Application Section */}
-                        {/* {user.role === 'user' && !user.roles?.includes('seller') && user.sellerStatus === 'none' && (
-                            <button
-                                onClick={handleApplySeller}
-                                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition"
-                            >
-                                🛒 Become a Seller
-                            </button>
-                        )} */}
-
-                        {/* {user.sellerStatus === 'pending' && (
-                            <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-3 rounded-xl text-center">
-                                ⏳ Seller Application Under Review
-                            </div>
-                        )} */}
-
-                        {/* {user.sellerStatus === 'rejected' && (
-                            <div className="w-full bg-red-50 border border-red-200 text-red-800 px-6 py-3 rounded-xl text-center">
-                                ❌ Seller Application Rejected
-                            </div>
-                        )} */}
-
-                        {/* Seller Toggle */}
-                        {/* {user.sellerStatus === "approved" && (
-                            <button
-                                onClick={handleToggleSeller}
-                                className={`w-full px-6 py-3 rounded-xl font-medium transition ${isSellerMode
-                                    ? "bg-gray-200 text-gray-800"
-                                    : "bg-purple-600 text-white hover:bg-purple-700"
-                                    }`}
-                            >
-                                {isSellerMode
-                                    ? "Switch to Buyer Mode"
-                                    : "Switch to Seller Dashboard"}
-                            </button>
-                        )} */}
 
                         <button
                             onClick={handleLogout}

@@ -15,8 +15,6 @@ import Marketplace from "./pages/Marketplace";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 
-// import SellerDashboard from "./pages/SellerDashboard";
-
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ServiceProviderRequests from "./pages/admin/ServiceProviderRequests";
@@ -52,9 +50,6 @@ const Approutes = () => {
                     <Route path="/marketplace" element={<PrivateRoute><Marketplace /></PrivateRoute>} />
                     <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-
-                    {/* Seller Route */}
-                    {/* <Route path="/seller" element={<PrivateRoute> <SellerDashboard /> </PrivateRoute>} /> */}
 
                     {/* Admin Routes */}
                     <Route path="/admin" element={<PrivateRoute role="admin"> <AdminLayout /> </PrivateRoute>}>

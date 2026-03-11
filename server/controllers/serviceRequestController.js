@@ -1,9 +1,6 @@
 const Service = require("../models/service");
 const ServiceRequest = require("../models/serviceRequest");
 
-
-
-
 const allowedTransitions = {
   PENDING: ["ACCEPTED", "REJECTED", "CANCELLED"],
   ACCEPTED: ["COMPLETED"],
@@ -11,7 +8,6 @@ const allowedTransitions = {
   REJECTED: [],
   CANCELLED: []
 };
-
 
 exports.createServiceRequest = async (req, res) => {
   try {
@@ -52,8 +48,6 @@ exports.createServiceRequest = async (req, res) => {
   }
 };
 
-
-
 exports.updateRequestStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -77,7 +71,7 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     if (["ACCEPTED", "REJECTED", "COMPLETED"].includes(status) &&
-        request.provider.toString() !== req.user.id) {
+      request.provider.toString() !== req.user.id) {
       return res.status(403).json({ message: "Only provider can update this request" });
     }
 
