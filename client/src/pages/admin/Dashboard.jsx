@@ -1,30 +1,38 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, MessageSquare, Calendar, ArrowRight, LayoutDashboard } from 'lucide-react';
+// import { Users, MessageSquare, Calendar, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { Users, MessageSquare, Calendar, ArrowRight, LayoutDashboard, Newspaper } from 'lucide-react';
 
 const Dashboard = () => {
     const adminFeatures = [
-        { 
-            title: 'Service Providers', 
-            icon: <Users />, 
-            path: '/admin/service-providers', 
+        {
+            title: 'Service Providers',
+            icon: <Users />,
+            path: '/admin/service-providers',
             color: 'bg-blue-600',
             description: 'Manage verification requests and view all registered service providers.'
         },
-        { 
-            title: 'Grievance Management', 
-            icon: <MessageSquare />, 
-            path: '/admin/grievances', 
+        {
+            title: 'Grievance Management',
+            icon: <MessageSquare />,
+            path: '/admin/grievances',
             color: 'bg-amber-600',
             description: 'Review and resolve complaints submitted by villagers.'
         },
-        { 
-            title: 'Event Management', 
-            icon: <Calendar />, 
-            path: '/admin/events', 
+        {
+            title: 'Event Management',
+            icon: <Calendar />,
+            path: '/admin/events',
             color: 'bg-purple-600',
             description: 'Create, edit, and delete community events and announcements.'
+        },
+        {
+            title: 'News Management',
+            icon: <Newspaper />,
+            path: '/admin/news',
+            color: 'bg-green-600',
+            description: 'Create and manage local village news updates visible to users.'
         }
     ];
 
@@ -59,7 +67,7 @@ const Dashboard = () => {
                                 <p className="text-gray-600 text-base leading-relaxed">{feature.description}</p>
                             </div>
                         </div>
-                        
+
                         <div className="w-full mt-auto pt-4 border-t border-gray-50">
                             <Link to={feature.path} className="text-white bg-gray-900 hover:bg-gray-800 w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all text-sm">
                                 Manage <ArrowRight size={18} />

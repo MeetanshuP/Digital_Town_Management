@@ -21,7 +21,12 @@ export const AuthProvider = ({ children }) => {
     const toggleSellerMode = () => {
         setIsSellerMode(prev => !prev);
     };
-
+    const refreshUser = async () => {
+        const token = sessionStorage.getItem("token");
+        if (token) {
+            await fetchProfile(token);
+        }
+    };
     const fetchProfile = async (token) => {
         try {
             const res = await axios.get('/auth/profile', {
@@ -89,7 +94,8 @@ export const AuthProvider = ({ children }) => {
             logout,
             applyForServiceProvider,
             isSellerMode,
-            toggleSellerMode
+            toggleSellerMode,
+            refreshUser,
         }}>
 
             {children}

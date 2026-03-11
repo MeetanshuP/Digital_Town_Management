@@ -6,7 +6,8 @@ import axios from '../utils/axiosInstance';
 
 const Profile = () => {
 
-    const { user, logout, isSellerMode, toggleSellerMode } = useAuth();
+    const { user, logout } = useAuth();
+
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -14,40 +15,7 @@ const Profile = () => {
         navigate('/login');
     };
 
-    const handleApplySeller = async () => {
-        try {
-            await axios.post('/seller/apply');
-            alert('Seller application submitted');
-            window.location.reload(); // refresh user state
-        } catch (err) {
-            alert(err.response?.data?.message || 'Error applying for seller');
-        }
-    };
-    const handleToggleSeller = () => {
-        if (!isSellerMode) {
-            toggleSellerMode();
-            navigate("/seller");
-        } else {
-            toggleSellerMode();
-            navigate("/");
-        }
-    };
-    {/* Seller Toggle */ }
-    {
-        user.sellerStatus === "approved" && (
-            <button
-                onClick={handleToggleSeller}
-                className={`w-full px-6 py-3 rounded-xl font-medium transition ${isSellerMode
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
-                    }`}
-            >
-                {isSellerMode
-                    ? "Switch to Buyer Mode"
-                    : "Switch to Seller Dashboard"}
-            </button>
-        )
-    }
+    const { refreshUser } = useAuth();
 
     if (!user) {
         return (
@@ -88,12 +56,6 @@ const Profile = () => {
                             </span>
                         )}
 
-                        {user.roles?.includes('seller') && (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                🛒 Seller
-                            </span>
-                        )}
-
                         {user.serviceProviderStatus === 'APPROVED' && (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                 <Briefcase size={16} /> Service Provider
@@ -116,42 +78,6 @@ const Profile = () => {
                             <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-3 rounded-xl flex items-center justify-center gap-2">
                                 ⏳ Service Provider Application Under Review
                             </div>
-                        )}
-                        {/* Seller Application Section */}
-                        {user.role === 'user' && !user.roles?.includes('seller') && user.sellerStatus === 'none' && (
-                            <button
-                                onClick={handleApplySeller}
-                                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition"
-                            >
-                                🛒 Become a Seller
-                            </button>
-                        )}
-
-                        {user.sellerStatus === 'pending' && (
-                            <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-3 rounded-xl text-center">
-                                ⏳ Seller Application Under Review
-                            </div>
-                        )}
-
-                        {user.sellerStatus === 'rejected' && (
-                            <div className="w-full bg-red-50 border border-red-200 text-red-800 px-6 py-3 rounded-xl text-center">
-                                ❌ Seller Application Rejected
-                            </div>
-                        )}
-
-                        {/* Seller Toggle */}
-                        {user.sellerStatus === "approved" && (
-                            <button
-                                onClick={handleToggleSeller}
-                                className={`w-full px-6 py-3 rounded-xl font-medium transition ${isSellerMode
-                                    ? "bg-gray-200 text-gray-800"
-                                    : "bg-purple-600 text-white hover:bg-purple-700"
-                                    }`}
-                            >
-                                {isSellerMode
-                                    ? "Switch to Buyer Mode"
-                                    : "Switch to Seller Dashboard"}
-                            </button>
                         )}
 
                         <button

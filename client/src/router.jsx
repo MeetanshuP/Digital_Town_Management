@@ -15,14 +15,13 @@ import Marketplace from "./pages/Marketplace";
 import Events from "./pages/Events";
 import Profile from "./pages/Profile";
 
-import SellerDashboard from "./pages/SellerDashboard";
-
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ServiceProviderRequests from "./pages/admin/ServiceProviderRequests";
 import GrievanceManagement from "./pages/admin/GrievanceManagement";
 import AdminEvents from "./pages/admin/AdminEvents";
 import SellerRequests from "./pages/admin/SellerRequests";
+import AdminNews from "./pages/admin/AdminNews";
 
 const Approutes = () => {
     const { user, isSellerMode } = useAuth();
@@ -52,30 +51,14 @@ const Approutes = () => {
                     <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />
                     <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
-                    {/* Seller Route */}
-                    <Route
-                        path="/seller"
-                        element={
-                            <PrivateRoute>
-                                <SellerDashboard />
-                            </PrivateRoute>
-                        }
-                    />
-
                     {/* Admin Routes */}
-                    <Route
-                        path="/admin"
-                        element={
-                            <PrivateRoute role="admin">
-                                <AdminLayout />
-                            </PrivateRoute>
-                        }
-                    >
+                    <Route path="/admin" element={<PrivateRoute role="admin"> <AdminLayout /> </PrivateRoute>}>
                         <Route index element={<Dashboard />} />
                         <Route path="service-providers" element={<ServiceProviderRequests />} />
                         <Route path="seller-requests" element={<SellerRequests />} />
                         <Route path="grievances" element={<GrievanceManagement />} />
                         <Route path="events" element={<AdminEvents />} />
+                        <Route path="news" element={<AdminNews />} />
                     </Route>
 
                     {/* Public */}
