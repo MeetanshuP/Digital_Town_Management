@@ -99,7 +99,7 @@ const Services = () => {
                 params: {
                     lat,
                     lng,
-                    radius: 50000,
+                    radius: 5000,
                     category: category !== "All" ? category : null
                 }
             });
