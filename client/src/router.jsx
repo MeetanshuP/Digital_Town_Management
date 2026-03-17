@@ -24,7 +24,7 @@ import SellerRequests from "./pages/admin/SellerRequests";
 import AdminNews from "./pages/admin/AdminNews";
 
 const Approutes = () => {
-    const { user, isSellerMode } = useAuth();
+    const { user } = useAuth();
     const location = useLocation();
 
     const hideNavbarPaths = ["/login", "/register"];
@@ -37,10 +37,13 @@ const Approutes = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
+
             {showNavbar && <Navbar />}
 
-            <main className={showNavbar ? "container mx-auto px-4 py-8" : ""}>
+            <main className={showNavbar ? "container mx-auto px-4 py-10" : ""}>
+
                 <Routes>
+
                     {/* Buyer Routes */}
                     <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
                     <Route path="/news" element={<PrivateRoute><News /></PrivateRoute>} />
@@ -52,7 +55,7 @@ const Approutes = () => {
                     <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
                     {/* Admin Routes */}
-                    <Route path="/admin" element={<PrivateRoute role="admin"> <AdminLayout /> </PrivateRoute>}>
+                    <Route path="/admin" element={<PrivateRoute role="admin"><AdminLayout /></PrivateRoute>}>
                         <Route index element={<Dashboard />} />
                         <Route path="service-providers" element={<ServiceProviderRequests />} />
                         <Route path="seller-requests" element={<SellerRequests />} />
@@ -64,8 +67,11 @@ const Approutes = () => {
                     {/* Public */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+
                 </Routes>
+
             </main>
+
         </div>
     );
 };

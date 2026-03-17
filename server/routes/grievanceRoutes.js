@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
 
 const {
     getAllGrievances,
@@ -11,11 +12,37 @@ const {
     deleteGrievance,
 } = require("../controllers/grievanceController");
 
-// All grievance routes require authentication
+/* ================= GET ALL GRIEVANCES ================= */
+
 router.get("/", authMiddleware, getAllGrievances);
+
+/* ================= GET SINGLE GRIEVANCE ================= */
+
 router.get("/:id", authMiddleware, getGrievanceById);
-router.post("/", authMiddleware, createGrievance);
-router.put("/:id", authMiddleware, updateGrievance);
-router.delete("/:id", authMiddleware, deleteGrievance);
+
+/* ================= CREATE GRIEVANCE ================= */
+
+router.post(
+    "/",
+    authMiddleware,
+    upload.single("evidence"),
+    createGrievance
+);
+
+/* ================= UPDATE GRIEVANCE (ADMIN) ================= */
+
+router.put(
+    "/:id",
+    authMiddleware,
+    updateGrievance
+);
+
+/* ================= DELETE GRIEVANCE ================= */
+
+router.delete(
+    "/:id",
+    authMiddleware,
+    deleteGrievance
+);
 
 module.exports = router;

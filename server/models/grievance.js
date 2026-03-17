@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const FeedbackSchema = new Schema(
+const GrievanceSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -26,7 +26,35 @@ const FeedbackSchema = new Schema(
     },
 
     evidence: {
-      type: String, // URL / filename / base64 etc.
+      url: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
+    },
+
+    location: {
+      address: String,
+      lat: Number,
+      lng: Number,
+    },
+
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "urgent"],
+      default: "low",
+    },
+
+    department: {
+      type: String,
+      default: "",
+    },
+
+    adminRemark: {
+      type: String,
       default: "",
     },
 
@@ -39,4 +67,4 @@ const FeedbackSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("Feedback", FeedbackSchema);
+module.exports = model("Grievance", GrievanceSchema);

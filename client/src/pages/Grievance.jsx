@@ -1,166 +1,260 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 import axios from "../utils/axiosInstance";
-import { MessageSquare, Send, CheckCircle, Clock, AlertCircle, Camera } from 'lucide-react';
-import ImageUpload from '../components/ImageUpload';
+import {
+    MessageCircle,
+    Trash2,
+    Upload,
+    Clock,
+    Loader,
+    CheckCircle
+} from "lucide-react";
 
 const Grievance = () => {
-    const [grievances, setGrievances] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({
-        subject: '',
-        message: '',
-        category: 'general',
-        evidence: ''
+
+    const [form, setForm] = useState({
+        subject: "",
+        message: "",
+        category: "general"
     });
-    const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
 
-    const categories = ['general', 'complaint', 'suggestion'];
+    const [file, setFile] = useState(null);
+    const [grievances, setGrievances] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    const onSubmit = async e => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-        setSubmitting(true);
+    const fetchGrievances = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                setError('Please login to submit a grievance');
-                setSubmitting(false);
-                return;
-            }
-            const res = await axios.post('/api/grievances', formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setSuccess('Grievance submitted successfully!');
-            setFormData({ subject: '', message: '', category: 'general' });
-            // Refresh grievances list
-            const updatedRes = await axios.get('/grievances', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setGrievances(updatedRes.data);
+            const res = await axios.get("/grievances");
+            setGrievances(res.data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to submit grievance');
-        } finally {
-            setSubmitting(false);
+            console.error(err);
         }
     };
 
     useEffect(() => {
-        const fetchGrievances = async () => {
-            try {
-                const token = sessionStorage.getItem('token');
-                if (!token) return setLoading(false);
-                const res = await axios.get('/grievances', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setGrievances(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchGrievances();
     }, []);
 
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'Resolved': return <CheckCircle className="text-green-500" size={18} />;
-            case 'In Progress': return <Clock className="text-blue-500" size={18} />;
-            case 'Pending': return <AlertCircle className="text-amber-500" size={18} />;
-            default: return null;
+    const handleChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            setLoading(true);
+
+            const formData = new FormData();
+            formData.append("subject", form.subject);
+            formData.append("message", form.message);
+            formData.append("category", form.category);
+
+            if (file) {
+                formData.append("evidence", file);
+            }
+
+            const res = await axios.post("/grievances", formData);
+            const newGrievance = res.data.grievance;
+
+            setGrievances(prev => [newGrievance, ...prev]);
+
+            setForm({
+                subject: "",
+                message: "",
+                category: "general"
+            });
+
+            setFile(null);
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteGrievance = async (id) => {
+        if (!window.confirm("Delete grievance?")) return;
+
+        try {
+            await axios.delete(`/grievances/${id}`);
+            setGrievances(prev => prev.filter(g => g._id !== id));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const statusConfig = {
+        open: {
+            label: "Open",
+            icon: Clock,
+            className: "bg-yellow-100 text-yellow-700 border border-yellow-200"
+        },
+        in_progress: {
+            label: "In Progress",
+            icon: Loader,
+            className: "bg-blue-100 text-blue-700 border border-blue-200"
+        },
+        resolved: {
+            label: "Resolved",
+            icon: CheckCircle,
+            className: "bg-green-100 text-green-700 border border-green-200"
         }
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2 space-y-8">
-                {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-medium">{error}</div>}
-                {success && <div className="bg-green-50 text-green-600 p-4 rounded-xl mb-6 text-sm font-medium">{success}</div>}
-                <div className="bg-amber-600 rounded-3xl p-10 text-white flex items-center justify-between overflow-hidden relative shadow-lg">
-                    <div className="relative z-10">
-                        <h1 className="text-3xl font-extrabold mb-2">Grievance & Feedback</h1>
-                        <p className="text-amber-50 text-lg">Report issues and track resolution status in real-time.</p>
-                    </div>
-                    <div className="bg-white/10 p-6 rounded-full relative z-10">
-                        <MessageSquare size={40} />
-                    </div>
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-                </div>
+        <div className="space-y-8">
 
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <Send className="text-amber-600" size={20} /> Submit New Grievance
-                    </h2>
-                    <form onSubmit={onSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Issue Category</label>
-                                <select name="category" value={formData.category} onChange={onChange} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 outline-none bg-white font-medium">
-                                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Issue Title</label>
-                                <input type="text" name="subject" value={formData.subject} onChange={onChange} placeholder="Short summary" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 outline-none" required />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Detailed Description</label>
-                            <textarea name="message" value={formData.message} onChange={onChange} rows="4" placeholder="Explain the problem in detail..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 outline-none" required></textarea>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <ImageUpload
-                                onUpload={(url) =>
-                                    setFormData((prev) => ({ ...prev, evidence: url }))
-                                }
+            {/* HEADER */}
+            <div className="bg-orange-500 text-white rounded-xl p-6 flex justify-between items-center shadow">
+                <div>
+                    <h1 className="text-xl font-bold">
+                        Grievance & Feedback
+                    </h1>
+                    <p className="text-sm opacity-90">
+                        Report issues and track resolution status in real-time.
+                    </p>
+                </div>
+                <MessageCircle size={28} />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+
+                {/* LEFT SIDE FORM */}
+                <div className="md:col-span-2">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
+
+                        <h2 className="text-lg font-semibold mb-4">
+                            Submit New Grievance
+                        </h2>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+
+                            <input
+                                name="subject"
+                                placeholder="Issue Title"
+                                value={form.subject}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-2"
+                                required
                             />
-                            {formData.evidence && (
-                                <p className="text-xs text-green-600 font-medium">
-                                    ✅ Evidence uploaded successfully
-                                </p>
-                            )}
-                        </div>
-                        <button type="submit" disabled={submitting} className="bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-amber-100">
-                            {submitting ? 'Submitting...' : 'Submit Complaint'}
-                        </button>
-                    </form>
+
+                            <textarea
+                                name="message"
+                                placeholder="Detailed Description"
+                                value={form.message}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-2"
+                                rows="3"
+                                required
+                            />
+
+                            <select
+                                name="category"
+                                value={form.category}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-2"
+                            >
+                                <option value="general">General</option>
+                                <option value="complaint">Complaint</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="suggestion">Suggestion</option>
+                            </select>
+
+                            <div className="flex items-center gap-3">
+                                <Upload size={18} />
+                                <input
+                                    type="file"
+                                    onChange={(e) => setFile(e.target.files[0])}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg transition"
+                            >
+                                {loading ? "Submitting..." : "Submit Complaint"}
+                            </button>
+
+                        </form>
+
+                    </div>
                 </div>
+
+                {/* RIGHT SIDE — MY GRIEVANCES */}
+                <div className="space-y-4">
+
+                    <div className="bg-white rounded-xl shadow-sm p-4">
+
+                        <h3 className="font-semibold mb-3">
+                            My Grievances
+                        </h3>
+
+                        {grievances.length === 0 && (
+                            <p className="text-gray-500 text-sm">
+                                No grievances submitted yet.
+                            </p>
+                        )}
+
+                        {grievances.slice(0, 5).map(g => (
+
+                            <div
+                                key={g._id}
+                                className="border rounded-lg p-3 mb-3 space-y-2 bg-white transition-all duration-300 ease-in-out hover:shadow-md hover:-translate-y-1 hover:scale-[1.01]"
+                            >
+
+                                <div className="flex justify-between items-center">
+                                    <p className="text-sm font-medium">
+                                        {g.subject}
+                                    </p>
+
+                                    {(() => {
+                                        const status = statusConfig[g.status];
+                                        const Icon = status.icon;
+
+                                        return (
+                                            <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${status.className}`}>
+                                                <Icon size={12} />
+                                                {status.label}
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+
+                                <p className="text-xs text-gray-600">
+                                    {g.message}
+                                </p>
+
+                                {g.evidence?.url && (
+                                    <img
+                                        src={g.evidence.url}
+                                        alt="Evidence"
+                                        className="w-full h-28 object-cover rounded-md"
+                                    />
+                                )}
+
+                                <button
+                                    onClick={() => deleteGrievance(g._id)}
+                                    className="flex items-center gap-1 text-red-500 text-xs hover:text-red-700 transition"
+                                >
+                                    <Trash2 size={14} />
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        ))}
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div className="lg:col-span-1 space-y-6">
-                <h2 className="text-xl font-bold text-gray-800 px-2">Recent Submissions</h2>
-                {loading ? (
-                    <div className="bg-white p-8 rounded-3xl border border-gray-100 flex justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-amber-600"></div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {grievances.length > 0 ? (
-                            grievances.map(item => (
-                                <div key={item._id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-amber-200 transition-all cursor-pointer">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-gray-800 text-sm">{item.title}</h3>
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-full">
-                                            {getStatusIcon(item.status)}
-                                            <span className="text-[10px] font-black uppercase text-gray-500">{item.status}</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-gray-500 text-xs line-clamp-2">{item.description}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="bg-white p-10 rounded-3xl border border-dashed border-gray-200 text-center">
-                                <p className="text-gray-400 font-medium">No complaints found. Your submissions will appear here.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
