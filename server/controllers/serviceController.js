@@ -1,4 +1,5 @@
 const Service = require("../models/service");
+const { clearCacheByPattern } = require("../utils/cacheInvalidation");
 
 /* ================= GET ALL SERVICES ================= */
 
@@ -57,6 +58,9 @@ exports.createService = async (req, res) => {
             address,
         });
 
+        // Invalidate cache
+        await clearCacheByPattern("cache:/api/services*");
+
         return res.status(201).json({
             message: "Service created successfully",
             service,
@@ -90,6 +94,9 @@ exports.updateService = async (req, res) => {
 
         await service.save();
 
+        // Invalidate cache
+        await clearCacheByPattern("cache:/api/services*");
+
         return res.status(200).json({
             message: "Service updated successfully",
             service,
@@ -113,6 +120,9 @@ exports.deleteService = async (req, res) => {
         }
 
         await service.deleteOne();
+
+        // Invalidate cache
+        await clearCacheByPattern("cache:/api/services*");
 
         return res.status(200).json({
             message: "Service deleted successfully",

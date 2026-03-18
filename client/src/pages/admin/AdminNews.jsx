@@ -13,7 +13,7 @@ const AdminNews = () => {
     const fetchNews = async () => {
         try {
             const res = await axios.get("/news");
-            setNews(res.data);
+            setNews(res.data.data);
         } catch (error) {
             console.error(error);
         }
