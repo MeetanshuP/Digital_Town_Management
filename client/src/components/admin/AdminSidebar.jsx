@@ -18,9 +18,9 @@ const AdminSidebar = () => {
           <Users size={18} /> Service Providers
         </NavLink>
 
-        <NavLink to="/admin/seller-requests" className="block p-2 rounded hover:bg-green-50">
+        {/* <NavLink to="/admin/seller-requests" className="block p-2 rounded hover:bg-green-50">
           <Store size={18} /> Seller Requests
-        </NavLink>
+        </NavLink> */}
 
         <NavLink to="/admin/grievances" className="block p-2 rounded hover:bg-green-50">
           <MessageSquare size={18} /> Grievances

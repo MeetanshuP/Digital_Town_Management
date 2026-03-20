@@ -1,26 +1,31 @@
-const Feedback = require("../models/feedback");
+const Grievance = require("../models/Grievance");
+const uploadToCloudinary = require("../utils/cloudinaryUpload");
+const cloudinary = require("../config/cloudinary");
 
 /* ================= GET ALL GRIEVANCES ================= */
 
 exports.getAllGrievances = async (req, res) => {
     try {
+
         let query = {};
 
-        // If not admin, only show user's own grievances
-        if (req.user.role !== 'admin') {
+        if (req.user.role !== "admin") {
             query.user = req.user.id;
         }
 
-        const grievances = await Feedback.find(query)
+        const grievances = await Grievance.find(query)
             .populate("user", "firstName lastName email")
             .sort({ createdAt: -1 });
 
-        return res.status(200).json(grievances);
+        res.status(200).json(grievances);
+
     } catch (error) {
-        return res.status(500).json({
+
+        res.status(500).json({
             message: "Server error",
             error: error.message,
         });
+
     }
 };
 
@@ -28,19 +33,25 @@ exports.getAllGrievances = async (req, res) => {
 
 exports.getGrievanceById = async (req, res) => {
     try {
-        const grievance = await Feedback.findById(req.params.id)
+
+        const grievance = await Grievance.findById(req.params.id)
             .populate("user", "firstName lastName email");
 
         if (!grievance) {
-            return res.status(404).json({ message: "Grievance not found" });
+            return res.status(404).json({
+                message: "Grievance not found",
+            });
         }
 
-        return res.status(200).json(grievance);
+        res.status(200).json(grievance);
+
     } catch (error) {
-        return res.status(500).json({
+
+        res.status(500).json({
             message: "Server error",
             error: error.message,
         });
+
     }
 };
 
@@ -48,33 +59,49 @@ exports.getGrievanceById = async (req, res) => {
 
 exports.createGrievance = async (req, res) => {
     try {
-        const { subject, message, category, evidence } = req.body;
 
-        if (!subject || !message || !category || !evidence) {
+        const { subject, message, category } = req.body;
+
+        if (!subject || !message) {
             return res.status(400).json({
                 message: "Subject and message are required",
             });
         }
-        console.log(req.body);
-        const grievance = await Feedback.create({
+
+        let evidence = {};
+
+        if (req.file) {
+
+            const result = await uploadToCloudinary(req.file.buffer);
+
+            evidence = {
+                url: result.secure_url,
+                public_id: result.public_id,
+            };
+
+        }
+
+        const grievance = await Grievance.create({
             subject,
             message,
             category: category || "general",
-            evidence: evidence || "",
             user: req.user.id,
             status: "open",
+            evidence,
         });
 
-        return res.status(201).json({
+        res.status(201).json({
             message: "Grievance submitted successfully",
             grievance,
         });
+
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
+
+        res.status(500).json({
             message: "Server error",
             error: error.message,
         });
+
     }
 };
 
@@ -82,28 +109,40 @@ exports.createGrievance = async (req, res) => {
 
 exports.updateGrievance = async (req, res) => {
     try {
-        const { status, response } = req.body;
 
-        const grievance = await Feedback.findById(req.params.id);
+        if (req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Only admin can update grievances",
+            });
+        }
+
+        const { status, adminRemark } = req.body;
+
+        const grievance = await Grievance.findById(req.params.id);
 
         if (!grievance) {
-            return res.status(404).json({ message: "Grievance not found" });
+            return res.status(404).json({
+                message: "Grievance not found",
+            });
         }
 
         if (status) grievance.status = status;
-        if (response) grievance.response = response;
+        if (adminRemark) grievance.adminRemark = adminRemark;
 
         await grievance.save();
 
-        return res.status(200).json({
+        res.status(200).json({
             message: "Grievance updated successfully",
             grievance,
         });
+
     } catch (error) {
-        return res.status(500).json({
+
+        res.status(500).json({
             message: "Server error",
             error: error.message,
         });
+
     }
 };
 
@@ -111,28 +150,41 @@ exports.updateGrievance = async (req, res) => {
 
 exports.deleteGrievance = async (req, res) => {
     try {
-        const grievance = await Feedback.findById(req.params.id);
+
+        const grievance = await Grievance.findById(req.params.id);
 
         if (!grievance) {
-            return res.status(404).json({ message: "Grievance not found" });
+            return res.status(404).json({
+                message: "Grievance not found",
+            });
         }
 
-        // Check if user is the owner
-        if (grievance.user.toString() !== req.user.id) {
+        if (
+            grievance.user.toString() !== req.user.id &&
+            req.user.role !== "admin"
+        ) {
             return res.status(403).json({
                 message: "Not authorized to delete this grievance",
             });
         }
 
+        // Delete image from Cloudinary
+        if (grievance.evidence?.public_id) {
+            await cloudinary.uploader.destroy(grievance.evidence.public_id);
+        }
+
         await grievance.deleteOne();
 
-        return res.status(200).json({
+        res.status(200).json({
             message: "Grievance deleted successfully",
         });
+
     } catch (error) {
-        return res.status(500).json({
+
+        res.status(500).json({
             message: "Server error",
             error: error.message,
         });
+
     }
 };

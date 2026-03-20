@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getNearbyPlaces, reverseGeocode } from "../services/placesApi";
 import ServiceCard from "../components/ServiceCard";
 import ServiceMap from "../components/ServiceMap";
-import { Search, Filter, PhoneCall } from "lucide-react";
+import { PhoneCall } from "lucide-react";
 
 const CITY_COORDS = {
     Ahmedabad: { lat: 23.0225, lng: 72.5714 },
@@ -21,8 +21,9 @@ const Services = () => {
     const [currentLatLng, setCurrentLatLng] = useState(CITY_COORDS.Gandhinagar);
     const [mapCenter, setMapCenter] = useState([23.2156, 72.6369]);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
 
-    const categories = ["All", "Health", "Education", "Government", "On Demand"];
+    const categories = ["All", "Health", "Education", "Government"];
 
     useEffect(() => {
         if (activeCategory === "All") {
@@ -45,28 +46,7 @@ const Services = () => {
     }, [activeCategory, currentLatLng]);
 
     const handleUseLocation = () => {
-        if (!navigator.geolocation) {
-            alert("Geolocation not supported");
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            successLocation,
-            errorLocation,
-            { enableHighAccuracy: true }
-        );
-    };
-
-    const handleCitySelect = (city) => {
-        if (!CITY_COORDS[city]) return;
-
-        const { lat, lng } = CITY_COORDS[city];
-
-        setLocation(city);
-        setLocationError("");
-        setCurrentLatLng({ lat, lng });
-        setMapCenter([lat, lng]);
-        setSelectedServiceId(null);
+        navigator.geolocation.getCurrentPosition(successLocation, errorLocation);
     };
 
     const successLocation = async (position) => {
@@ -74,84 +54,67 @@ const Services = () => {
 
         setCurrentLatLng({ lat: latitude, lng: longitude });
         setMapCenter([latitude, longitude]);
-        setSelectedServiceId(null);
 
         try {
             const geoRes = await reverseGeocode(latitude, longitude);
-            const city = geoRes.city;
-
-            setLocation(city || "Near you");
+            setLocation(geoRes.city || "Near you");
 
             await fetchNearbyPlaces(latitude, longitude, activeCategory);
-        } catch (err) {
+        } catch {
             setLocationError("Failed to load nearby services");
         }
     };
 
     const errorLocation = () => {
-        setLocationError(
-            "Location permission denied. Please select city manually."
-        );
+        setLocationError("Location permission denied.");
     };
 
     const fetchNearbyPlaces = async (lat, lng, category = null) => {
         setLoading(true);
-
         try {
             const data = await getNearbyPlaces(lat, lng, category);
-
             setServices(data);
             setFilteredServices(data);
-        } catch (err) {
-            console.error(err);
+        } catch {
             setLocationError("Failed to load nearby services");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleManualLocationChange = async (newLatLng) => {
-        const { lat, lng } = newLatLng;
-
+    const handleManualLocationChange = async ({ lat, lng }) => {
         setCurrentLatLng({ lat, lng });
         setMapCenter([lat, lng]);
-        setSelectedServiceId(null);
-
-        try {
-            const geoRes = await reverseGeocode(lat, lng);
-            const city = geoRes.city;
-
-            setLocation(city || "Selected location");
-        } catch (err) {
-            console.error("Manual location change geocode error:", err);
-            setLocation("Selected location");
-        }
     };
 
     const handleServiceSelect = (id) => {
         setSelectedServiceId((prev) => (prev === id ? null : id));
     };
 
+    const handleDirections = (service) => {
+        setSelectedService(service);
+    };
+
     return (
         <div className="space-y-8">
-            <div className="bg-blue-600 rounded-3xl p-10 text-white flex items-center justify-between overflow-hidden relative shadow-lg">
-                <div className="relative z-10">
-                    <h1 className="text-4xl font-extrabold mb-2">
+
+            {/* HEADER */}
+            <div className="bg-blue-600 rounded-3xl p-10 text-white flex justify-between shadow-lg">
+                <div>
+                    <h1 className="text-4xl font-extrabold">
                         Local Services Directory
                     </h1>
-                    <p className="text-blue-100 text-lg">
-                        Find essential services and contact details in your village.
+                    <p className="text-blue-100">
+                        Find essential services near you
                     </p>
                 </div>
-
-                <div className="bg-white/10 p-6 rounded-full relative z-10">
-                    <PhoneCall size={48} />
-                </div>
-
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                <PhoneCall size={48} />
             </div>
 
+            {/* FILTER + LOCATION BAR */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+
+                {/* Categories */}
                 <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
                         <button
@@ -160,9 +123,9 @@ const Services = () => {
                                 setActiveCategory(cat);
                                 setSelectedServiceId(null);
                             }}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === cat
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                                : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                            className={`px-4 py-2 rounded-xl text-sm font-bold ${activeCategory === cat
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-50 text-gray-600"
                                 }`}
                         >
                             {cat}
@@ -170,93 +133,65 @@ const Services = () => {
                     ))}
                 </div>
 
-                <div className="relative w-full md:w-64">
-                    <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={18}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search services..."
-                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
+                {/* Location Controls */}
+                <div className="flex gap-2">
+
+                    <select
+                        onChange={(e) => handleCitySelect(e.target.value)}
+                        className="px-4 py-2 rounded-xl border"
+                    >
+                        <option value="">Select City</option>
+                        <option value="Ahmedabad">Ahmedabad</option>
+                        <option value="Gandhinagar">Gandhinagar</option>
+                        <option value="Surat">Surat</option>
+                    </select>
+
+                    <button
+                        onClick={handleUseLocation}
+                        className="px-4 py-2 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700"
+                    >
+                        Use My Location
+                    </button>
+
                 </div>
-
-                <select
-                    onChange={(e) => handleCitySelect(e.target.value)}
-                    className="px-4 py-2 rounded-xl border"
-                >
-                    <option value="">Select City</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
-                    <option value="Gandhinagar">Gandhinagar</option>
-                    <option value="Surat">Surat</option>
-                </select>
-
-                <button
-                    onClick={handleUseLocation}
-                    className="px-4 py-2 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition-all"
-                >
-                    Use My Location
-                </button>
             </div>
 
+            {/* MAIN GRID */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                <div className="md:col-span-1 space-y-6">
-                    {location && (
-                        <p className="text-sm text-green-600 font-semibold italic">
-                            Showing services near: {location}
-                        </p>
-                    )}
 
-                    {locationError && (
-                        <p className="text-sm text-red-500 font-semibold bg-red-50 p-3 rounded-xl border border-red-100">
-                            {locationError}
-                        </p>
-                    )}
+                {/* LEFT SIDE */}
+                <div className="md:col-span-1 space-y-4 max-h-[80vh] overflow-y-auto">
 
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                    {filteredServices.map((service) => (
+                        <div key={service._id}>
+                            <ServiceCard
+                                service={service}
+                                isSelected={selectedServiceId === service._id}
+                                onSelect={handleServiceSelect}
+                            />
+
+                            <button
+                                onClick={() => handleDirections(service)}
+                                className="mt-2 w-full bg-blue-600 text-white py-2 rounded-xl"
+                            >
+                                Get Directions
+                            </button>
                         </div>
-                    ) : (
-                        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
-                            {filteredServices.length > 0 ? (
-                                filteredServices.map((service) => (
-                                    <div
-                                        key={service._id}
-                                        className="transition-all duration-300"
-                                    >
-                                        <ServiceCard
-                                            service={service}
-                                            isSelected={selectedServiceId === service._id}
-                                            onSelect={handleServiceSelect}
-                                        />
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <Filter
-                                        size={40}
-                                        className="mx-auto text-gray-300 mb-4"
-                                    />
-                                    <h3 className="text-lg font-bold text-gray-400">
-                                        No services found.
-                                    </h3>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    ))}
                 </div>
 
-                <div className="md:col-span-2 sticky top-8">
+                {/* RIGHT SIDE MAP */}
+                <div className="md:col-span-2 h-[650px] sticky top-8">
                     <ServiceMap
                         services={filteredServices}
                         center={mapCenter}
                         userLocation={currentLatLng}
+                        selectedService={selectedService}
                         selectedServiceId={selectedServiceId}
                         onUserLocationChange={handleManualLocationChange}
                     />
                 </div>
+
             </div>
         </div>
     );

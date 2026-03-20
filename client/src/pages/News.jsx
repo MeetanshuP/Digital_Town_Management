@@ -8,34 +8,38 @@ const News = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔀 Toggle state
+  // Toggle state
   const [view, setView] = useState("local"); // local | nearby
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Fetch News with Pagination
+  const fetchNews = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
+
+      const res = await axios.get(`/news?page=${pageNumber}&limit=6`);
+
+      const { data, page, totalPages } = res.data;
+
+      setNews(data); // backend already sorted
+      setPage(page);
+      setTotalPages(totalPages);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Trigger fetch on page/view change
   useEffect(() => {
     if (view !== "local") return;
-
-    const fetchNews = async () => {
-      try {
-        setLoading(true);
-
-        const res = await axios.get("/news");
-
-        // Ensure newest news appears first
-        const sortedNews = res.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-
-        setNews(sortedNews);
-
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, [view]);
+    fetchNews(page);
+  }, [view, page]);
 
   return (
     <div className="space-y-8">
@@ -47,10 +51,13 @@ const News = () => {
             Stay updated with the latest happenings in your community.
           </p>
 
-          {/* 🔀 Toggle Buttons */}
+          {/* Toggle Buttons */}
           <div className="mt-6 flex gap-4">
             <button
-              onClick={() => setView("local")}
+              onClick={() => {
+                setView("local");
+                setPage(1); // reset pagination
+              }}
               className={`px-5 py-2 rounded-full font-semibold ${view === "local"
                 ? "bg-white text-green-700"
                 : "bg-white/20 text-white"
@@ -81,10 +88,10 @@ const News = () => {
 
       {/* ================= CONTENT ================= */}
 
-      {/* Nearby (Location-based) News */}
+      {/* Nearby News */}
       {view === "nearby" && <LocationNews />}
 
-      {/* Local (Admin) News */}
+      {/* Local News */}
       {view === "local" && (
         <>
           {loading ? (
@@ -98,7 +105,6 @@ const News = () => {
 
                   <div className="p-6 space-y-4">
                     <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-
                     <div className="h-6 bg-gray-200 rounded w-3/4"></div>
 
                     <div className="space-y-2">
@@ -116,20 +122,45 @@ const News = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {news.length > 0 ? (
-                news.map((item) => (
-                  <NewsCard key={item._id} news={item} />
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center">
-                  <Bell size={48} className="mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-xl font-bold text-gray-400">
-                    No news updates available yet.
-                  </h3>
-                </div>
-              )}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {news.length > 0 ? (
+                  news.map((item) => (
+                    <NewsCard key={item._id} news={item} />
+                  ))
+                ) : (
+                  <div className="col-span-full py-20 text-center">
+                    <Bell size={48} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-xl font-bold text-gray-400">
+                      No news updates available yet.
+                    </h3>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <button
+                  onClick={() => setPage((prev) => prev - 1)}
+                  disabled={page === 1}
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                >
+                  Prev
+                </button>
+
+                <span className="text-sm font-medium">
+                  Page {page} of {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setPage((prev) => prev + 1)}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </>
           )}
         </>
       )}

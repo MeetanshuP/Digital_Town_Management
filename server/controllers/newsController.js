@@ -1,16 +1,58 @@
 const News = require("../models/news");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
+const { clearCacheByPattern } = require("../utils/cacheInvalidation");
 
 /* ================= GET ALL LOCAL NEWS ================= */
 
 exports.getAllNews = async (req, res) => {
     try {
-        const news = await News.find()
-            .populate("postedBy", "firstName lastName email")
-            .sort({ createdAt: -1 });
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 10, 20);
 
-        return res.status(200).json(news);
+        const skip = (page - 1) * limit;
+
+        // ✅ Create unique cache key per page
+        const cacheKey = `news:page:${page}:limit:${limit}`;
+
+        // ✅ Try cache first
+        const cachedData = await getCache(cacheKey);
+
+        if (cachedData) {
+            console.log("✅ Serving news from Redis:", cacheKey);
+
+            return res.status(200).json({
+                ...cachedData,
+                source: "cache"
+            });
+        }
+
+        // ❌ Cache miss → fetch from DB
+        const [news, total] = await Promise.all([
+            News.find()
+                .populate("postedBy", "firstName lastName email")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+
+            News.countDocuments()
+        ]);
+
+        const responseData = {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            data: news
+        };
+
+        // ✅ Store in Redis (TTL: 10 min)
+        await setCache(cacheKey, responseData, 600);
+
+        console.log("🔥 Stored news in Redis:", cacheKey);
+
+        return res.status(200).json(responseData);
+
     } catch (error) {
         return res.status(500).json({
             message: "Server error",
@@ -81,6 +123,9 @@ exports.createNews = async (req, res) => {
             postedBy: req.user.id,
         });
 
+        // 🔥 Invalidate cache
+        await clearCacheByPattern("news:*");
+
         return res.status(201).json({
             message: "News created successfully",
             news,
@@ -133,6 +178,9 @@ exports.updateNews = async (req, res) => {
 
         await news.save();
 
+        // 🔥 Invalidate cache
+        await clearCacheByPattern("news:*");
+
         return res.status(200).json({
             message: "News updated successfully",
             news,
@@ -157,6 +205,9 @@ exports.deleteNews = async (req, res) => {
         }
 
         await news.deleteOne();
+
+        // 🔥 Invalidate cache
+        await clearCacheByPattern("news:*");
 
         return res.status(200).json({
             message: "News deleted successfully",
