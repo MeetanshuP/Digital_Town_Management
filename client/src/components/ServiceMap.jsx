@@ -1,7 +1,13 @@
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import { useMap } from "react-leaflet";
-
+import React, { useEffect, useRef, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+  useMap,
+  Polyline
+} from "react-leaflet";
 import L from "leaflet";
 
 // Fix default marker icon issue
@@ -15,14 +21,16 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// Change map center
 const ChangeView = ({ center }) => {
   const map = useMap();
-  React.useEffect(() => {
+  useEffect(() => {
     map.setView(center, 13);
   }, [center, map]);
   return null;
 };
 
+// Map click handler
 const MapEvents = ({ onMapClick }) => {
   useMapEvents({
     click: (e) => {
@@ -32,28 +40,46 @@ const MapEvents = ({ onMapClick }) => {
   return null;
 };
 
-const ServiceMap = ({ services, center, userLocation, selectedServiceId, onUserLocationChange }) => {
+const ServiceMap = ({
+  services,
+  center,
+  userLocation,
+  selectedServiceId,
+  selectedService,
+  onUserLocationChange,
+}) => {
   const map = useMap();
-  const markerRefs = React.useRef({});
+  const markerRefs = useRef({});
 
+  // Route state
+  const [routeCoords, setRouteCoords] = useState([]);
+
+  // User icon
   const userIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
   });
 
-  React.useEffect(() => {
+  // Focus selected service
+  useEffect(() => {
     if (selectedServiceId && markerRefs.current[selectedServiceId]) {
-      const selectedService = services.find(s => s._id === selectedServiceId);
-      if (selectedService) {
-        const lat = selectedService.latitude || (selectedService.location?.coordinates && selectedService.location.coordinates[1]);
-        const lng = selectedService.longitude || (selectedService.location?.coordinates && selectedService.location.coordinates[0]);
+      const selected = services.find((s) => s._id === selectedServiceId);
+
+      if (selected) {
+        const lat =
+          selected.latitude ||
+          selected.location?.coordinates?.[1];
+        const lng =
+          selected.longitude ||
+          selected.location?.coordinates?.[0];
 
         if (lat && lng) {
-          map.flyTo([lat, lng], 15, { animate: true, duration: 1.5 });
+          map.flyTo([lat, lng], 15, { duration: 1.5 });
+
           setTimeout(() => {
             markerRefs.current[selectedServiceId]?.openPopup();
           }, 500);
@@ -62,15 +88,51 @@ const ServiceMap = ({ services, center, userLocation, selectedServiceId, onUserL
     }
   }, [selectedServiceId, services, map]);
 
+  // ROUTE LOGIC (MAIN FEATURE)
+  useEffect(() => {
+    if (!userLocation || !selectedService) return;
+
+    const fetchRoute = async () => {
+      try {
+        const lat = selectedService.latitude;
+        const lng = selectedService.longitude;
+
+        if (!lat || !lng) return;
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${lng},${lat}?overview=full&geometries=geojson`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.routes && data.routes.length > 0) {
+          const coords = data.routes[0].geometry.coordinates.map(
+            (coord) => [coord[1], coord[0]]
+          );
+
+          setRouteCoords(coords);
+
+          // Auto zoom to route
+          map.fitBounds(coords);
+        }
+      } catch (err) {
+        console.error("Route error:", err);
+      }
+    };
+
+    fetchRoute();
+  }, [userLocation, selectedService, map]);
+
   return (
     <>
       <ChangeView center={center} />
       <MapEvents onMapClick={onUserLocationChange} />
+
       <TileLayer
-        attribution='© OpenStreetMap contributors'
+        attribution="© OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      {/* User Marker */}
       {userLocation && (
         <Marker
           position={[userLocation.lat, userLocation.lng]}
@@ -78,23 +140,23 @@ const ServiceMap = ({ services, center, userLocation, selectedServiceId, onUserL
           draggable={true}
           eventHandlers={{
             dragend: (e) => {
-              const marker = e.target;
-              const position = marker.getLatLng();
-              onUserLocationChange(position);
+              const pos = e.target.getLatLng();
+              onUserLocationChange(pos);
             },
           }}
         >
-          <Popup>
-            <strong>Your Location</strong>
-            <br />
-            Drag me or click map to change site.
-          </Popup>
+          <Popup>Your Location</Popup>
         </Marker>
       )}
 
+      {/* Service Markers */}
       {services.map((service) => {
-        const lat = service.latitude || (service.location?.coordinates && service.location.coordinates[1]);
-        const lng = service.longitude || (service.location?.coordinates && service.location.coordinates[0]);
+        const lat =
+          service.latitude ||
+          service.location?.coordinates?.[1];
+        const lng =
+          service.longitude ||
+          service.location?.coordinates?.[0];
 
         if (!lat || !lng) return null;
 
@@ -107,41 +169,34 @@ const ServiceMap = ({ services, center, userLocation, selectedServiceId, onUserL
             }}
           >
             <Popup>
-              <div className="p-1 min-w-[200px]">
-                <strong className="text-blue-600 font-bold text-lg block mb-1">
-                  {service.serviceName || service.name}
-                </strong>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p className="font-semibold text-blue-500 uppercase text-xs tracking-wider">
-                    {service.category}
-                  </p>
-                  <p className="border-t border-gray-100 pt-1 mt-1">{service.address}</p>
-                  {service.contact && (
-                    <p className="flex items-center gap-1 text-gray-500 italic mt-1 font-medium">
-                      📞 {service.contact}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <strong>{service.serviceName || service.name}</strong>
+              <br />
+              {service.address}
             </Popup>
           </Marker>
         );
       })}
+
+      {/* ROUTE LINE */}
+      {routeCoords.length > 0 && (
+        <Polyline positions={routeCoords} color="blue" weight={5} />
+      )}
     </>
   );
 };
 
+// Wrapper (unchanged except height fix)
 const MapWrapper = (props) => {
   return (
     <MapContainer
       center={props.center}
       zoom={13}
-      style={{ height: "600px", width: "100%", borderRadius: "1.5rem" }}
+      style={{ height: "100%", width: "100%", borderRadius: "1.5rem" }}
       className="shadow-xl border border-gray-100 sticky top-8"
     >
       <ServiceMap {...props} />
     </MapContainer>
   );
-}
+};
 
 export default MapWrapper;
