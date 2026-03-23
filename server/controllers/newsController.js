@@ -225,16 +225,16 @@ exports.deleteNews = async (req, res) => {
 
 const {
     getLocationFromCoordinates
-} = require("../services/location.service");
+} = require("../services/locationService");
 
 const {
     fetchNewsByLocationAndCategory
-} = require("../services/news.service");
+} = require("../services/newsService");
 
 const {
     getCache,
     setCache
-} = require("../services/cache.service");
+} = require("../services/cacheService");
 
 exports.getLocationBasedNews = async (req, res) => {
     try {
