@@ -6,6 +6,7 @@ const { getLocationFromCoordinates } = require("../services/locationService");
 const { fetchNewsByLocationAndCategory } = require("../services/newsService");
 const { getCache, setCache, clearCacheByPattern: clearNodeCache } = require("../services/cacheService");
 
+
 /* ================= GET ALL LOCAL NEWS ================= */
 
 exports.getAllNews = async (req, res) => {
@@ -231,6 +232,7 @@ exports.deleteNews = async (req, res) => {
 };
 
 /* ================= LOCATION BASED LIVE NEWS ================= */
+
 
 exports.getLocationBasedNews = async (req, res) => {
     try {
