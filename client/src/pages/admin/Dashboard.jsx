@@ -6,13 +6,13 @@ import { Users, MessageSquare, Calendar, ArrowRight, LayoutDashboard, Newspaper 
 
 const Dashboard = () => {
     const adminFeatures = [
-        {
+        /* {
             title: 'Service Providers',
             icon: <Users />,
             path: '/admin/service-providers',
             color: 'bg-blue-600',
             description: 'Manage verification requests and view all registered service providers.'
-        },
+        }, */
         {
             title: 'Grievance Management',
             icon: <MessageSquare />,

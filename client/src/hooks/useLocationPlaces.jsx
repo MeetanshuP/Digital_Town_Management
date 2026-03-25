@@ -8,7 +8,7 @@ const useNearbyPlaces = () => {
     const [location, setLocation] = useState(null);
     const [locationError, setLocationError] = useState("");
 
-    const fetchNearbyPlaces = async (lat, lng, category = null) => {
+    const fetchNearbyPlaces = async (lat, lng, category = null, radius = 5000) => {
 
         setLoading(true);
 
@@ -17,7 +17,7 @@ const useNearbyPlaces = () => {
                 params: {
                     lat,
                     lng,
-                    radius: 5000,
+                    radius,
                     category: category !== "All" ? category : null
                 }
             });

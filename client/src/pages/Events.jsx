@@ -106,7 +106,7 @@ const Events = () => {
                         Community Events
                     </button>
 
-                    <button
+{/*                     <button
                         onClick={() => setActiveTab("nearby")}
                         className={`pb-2 font-bold ${activeTab === "nearby"
                             ? "text-purple-600 border-b-2 border-purple-600"
@@ -114,7 +114,7 @@ const Events = () => {
                             }`}
                     >
                         Nearby Events
-                    </button>
+                    </button> */}
                 </div>
 
                 {user?.role === 'admin' && activeTab === "community" && (
@@ -128,7 +128,7 @@ const Events = () => {
             </div>
 
             {/* Content Section */}
-            {activeTab === "community" ? (
+            {activeTab === "community" && (
                 loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -146,8 +146,6 @@ const Events = () => {
                         )}
                     </div>
                 )
-            ) : (
-                <NearbyEvents />
             )}
 
             {/* Create Event Modal */}

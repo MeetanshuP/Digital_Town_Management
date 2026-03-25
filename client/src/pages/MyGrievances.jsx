@@ -22,8 +22,6 @@ const MyGrievances = () => {
 
     const handleDelete = async (id) => {
 
-        if (!window.confirm("Delete this grievance?")) return;
-
         try {
 
             await deleteGrievance(id);

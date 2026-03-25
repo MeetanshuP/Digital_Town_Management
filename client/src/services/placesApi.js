@@ -1,11 +1,11 @@
 import axios from "../utils/axiosInstance";
 
-export const getNearbyPlaces = async (lat, lng, category = null) => {
+export const getNearbyPlaces = async (lat, lng, category = null, radius = 5000) => {
     const res = await axios.get("/places/nearby", {
         params: {
             lat,
             lng,
-            radius: 5000,
+            radius,
             category: category !== "All" ? category : null
         }
     });

@@ -56,15 +56,15 @@ const Profile = () => {
                             </span>
                         )}
 
-                        {user.serviceProviderStatus === 'APPROVED' && (
+                        {/* {user.serviceProviderStatus === 'APPROVED' && (
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                 <Briefcase size={16} /> Service Provider
                             </span>
-                        )}
+                        )} */}
                     </div>
 
                     <div className="border-t border-gray-100 pt-8 flex flex-col gap-4">
-                        {user.role === 'user' && user.serviceProviderStatus === 'NONE' && (
+                        {/* {user.role === 'user' && user.serviceProviderStatus === 'NONE' && (
                             <Link
                                 to="/become-service-provider"
                                 className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
@@ -78,7 +78,7 @@ const Profile = () => {
                             <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-3 rounded-xl flex items-center justify-center gap-2">
                                 ⏳ Service Provider Application Under Review
                             </div>
-                        )}
+                        )} */}
 
                         <button
                             onClick={handleLogout}

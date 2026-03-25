@@ -56,6 +56,9 @@ const AdminNews = () => {
             setDescription("");
             setImage(null);
             setEditingId(null);
+            
+            const fileInput = document.querySelector('input[type="file"]');
+            if (fileInput) fileInput.value = "";
 
             fetchNews();
 
@@ -67,8 +70,6 @@ const AdminNews = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this news?")) return;
-
         try {
             await axios.delete(`/news/${id}`);
             fetchNews();
@@ -115,6 +116,27 @@ const AdminNews = () => {
                     onChange={(e) => setImage(e.target.files[0])}
                 />
 
+                {image && (
+                    <div className="mt-2 relative inline-block">
+                        <img
+                            src={typeof image === "string" ? image : URL.createObjectURL(image)}
+                            alt="Preview"
+                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setImage(null);
+                                const fileInput = document.querySelector('input[type="file"]');
+                                if (fileInput) fileInput.value = "";
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md hover:bg-red-600 transition-colors"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                )}
+
                 <div className="flex items-center gap-3">
                     <button
                         type="submit"
@@ -132,6 +154,8 @@ const AdminNews = () => {
                                 setTitle("");
                                 setDescription("");
                                 setImage(null);
+                                const fileInput = document.querySelector('input[type="file"]');
+                                if (fileInput) fileInput.value = "";
                             }}
                             className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
                         >

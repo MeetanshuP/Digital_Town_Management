@@ -1,7 +1,7 @@
 import React from 'react';
 import { Phone, MapPin, Info } from 'lucide-react';
 
-const ServiceCard = ({ service, isSelected, onSelect }) => {
+const ServiceCard = ({ service, isSelected, onSelect, isRouteActive, onGetDirections, onClearDirections }) => {
     return (
         <div className={`bg-white rounded-2xl p-6 shadow-sm border transition-all flex flex-col h-full ${isSelected ? 'border-blue-500 shadow-md ring-1 ring-blue-100' : 'border-gray-100 hover:shadow-md'
             }`}>
@@ -28,6 +28,18 @@ const ServiceCard = ({ service, isSelected, onSelect }) => {
                             <span className="text-sm line-clamp-2">{service.address}</span>
                         </div>
                     )}
+                    {service.metadata?.amenities?.length > 0 && (
+                        <div className="pt-2">
+                            <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Amenities</p>
+                            <div className="flex flex-wrap gap-2">
+                                {service.metadata.amenities.map((amenity, i) => (
+                                    <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg font-medium">
+                                        {amenity}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -41,6 +53,24 @@ const ServiceCard = ({ service, isSelected, onSelect }) => {
                 <Info size={16} />
                 {isSelected ? 'Hide Details' : 'Details'}
             </button>
+
+            {isSelected && (
+                isRouteActive ? (
+                    <button
+                        onClick={onClearDirections}
+                        className="mt-2 w-full bg-red-500 text-white py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition-colors"
+                    >
+                        Clear Route
+                    </button>
+                ) : (
+                    <button
+                        onClick={onGetDirections}
+                        className="mt-2 w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors"
+                    >
+                        Get Directions
+                    </button>
+                )
+            )}
         </div>
     );
 };

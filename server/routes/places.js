@@ -25,13 +25,13 @@ router.get("/nearby", async (req, res) => {
           location::geography,
           ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
         ) AS distance
-      FROM places
+      FROM gujarat_places
       WHERE ST_DWithin(
         location::geography,
         ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
         $3
       )
-      AND ($4::text IS NULL OR category = $4)
+      AND ($4::text IS NULL OR category = ANY(string_to_array($4, ',')))
       AND ($5::text IS NULL OR type = $5)
       ORDER BY distance
       LIMIT 500;
@@ -51,8 +51,8 @@ router.get("/nearby", async (req, res) => {
 
 
   } catch (err) {
-    // console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 });
 

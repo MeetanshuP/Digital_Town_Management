@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {
   getLocationFromCoordinates
-} = require("../services/location.service");
+} = require("../services/locationService");
 
 router.get("/reverse-geocode", async (req, res) => {
   const { lat, lon } = req.query;

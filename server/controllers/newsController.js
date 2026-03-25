@@ -1,7 +1,10 @@
 const News = require("../models/news");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
-const { clearCacheByPattern } = require("../utils/cacheInvalidation");
+const { clearCacheByPattern: clearRedisCache } = require("../utils/cacheInvalidation");
+const { getLocationFromCoordinates } = require("../services/locationService");
+const { fetchNewsByLocationAndCategory } = require("../services/newsService");
+const { getCache, setCache, clearCacheByPattern: clearNodeCache } = require("../services/cacheService");
 
 /* ================= GET ALL LOCAL NEWS ================= */
 
@@ -124,7 +127,9 @@ exports.createNews = async (req, res) => {
         });
 
         // 🔥 Invalidate cache
-        await clearCacheByPattern("news:*");
+        await clearRedisCache("news:*");
+        await clearRedisCache("cache:/api/news*");
+        clearNodeCache("news:*");
 
         return res.status(201).json({
             message: "News created successfully",
@@ -179,7 +184,9 @@ exports.updateNews = async (req, res) => {
         await news.save();
 
         // 🔥 Invalidate cache
-        await clearCacheByPattern("news:*");
+        await clearRedisCache("news:*");
+        await clearRedisCache("cache:/api/news*");
+        clearNodeCache("news:*");
 
         return res.status(200).json({
             message: "News updated successfully",
@@ -207,7 +214,9 @@ exports.deleteNews = async (req, res) => {
         await news.deleteOne();
 
         // 🔥 Invalidate cache
-        await clearCacheByPattern("news:*");
+        await clearRedisCache("news:*");
+        await clearRedisCache("cache:/api/news*");
+        clearNodeCache("news:*");
 
         return res.status(200).json({
             message: "News deleted successfully",
@@ -222,19 +231,6 @@ exports.deleteNews = async (req, res) => {
 };
 
 /* ================= LOCATION BASED LIVE NEWS ================= */
-
-const {
-    getLocationFromCoordinates
-} = require("../services/location.service");
-
-const {
-    fetchNewsByLocationAndCategory
-} = require("../services/news.service");
-
-const {
-    getCache,
-    setCache
-} = require("../services/cache.service");
 
 exports.getLocationBasedNews = async (req, res) => {
     try {

@@ -16,6 +16,7 @@ const Services = () => {
     const [filteredServices, setFilteredServices] = useState([]);
     const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState("All");
+    const [radius, setRadius] = useState(5000);
     const [location, setLocation] = useState(null);
     const [locationError, setLocationError] = useState("");
     const [currentLatLng, setCurrentLatLng] = useState(CITY_COORDS.Gandhinagar);
@@ -23,7 +24,9 @@ const Services = () => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [selectedService, setSelectedService] = useState(null);
 
-    const categories = ["All", "Health", "Education", "Government"];
+    const fetchCategories = ["Health", "Education", "Government", "Finance", "Recreation", "Public_Service", "Utilities"];
+    const baseCategories = ["Health", "Education", "Government", "Finance", "Recreation"];
+    const categories = ["All", ...baseCategories];
 
     useEffect(() => {
         if (activeCategory === "All") {
@@ -41,9 +44,21 @@ const Services = () => {
         fetchNearbyPlaces(
             currentLatLng.lat,
             currentLatLng.lng,
-            activeCategory
+            activeCategory === "All" ? fetchCategories.join(",") : activeCategory,
+            radius
         );
-    }, [activeCategory, currentLatLng]);
+    }, [activeCategory, currentLatLng, radius]);
+
+    // Check if selected service is still in the filtered list when services change
+    useEffect(() => {
+        if (selectedServiceId && services.length > 0) {
+            const stillExists = services.some(s => s._id === selectedServiceId);
+            if (!stillExists) {
+                setSelectedServiceId(null);
+                setSelectedService(null);
+            }
+        }
+    }, [services, selectedServiceId]);
 
     const handleUseLocation = () => {
         navigator.geolocation.getCurrentPosition(successLocation, errorLocation);
@@ -54,12 +69,14 @@ const Services = () => {
 
         setCurrentLatLng({ lat: latitude, lng: longitude });
         setMapCenter([latitude, longitude]);
+        setSelectedService(null);
+        setSelectedServiceId(null);
 
         try {
             const geoRes = await reverseGeocode(latitude, longitude);
             setLocation(geoRes.city || "Near you");
 
-            await fetchNearbyPlaces(latitude, longitude, activeCategory);
+            await fetchNearbyPlaces(latitude, longitude, activeCategory === "All" ? fetchCategories.join(",") : activeCategory, radius);
         } catch {
             setLocationError("Failed to load nearby services");
         }
@@ -69,10 +86,22 @@ const Services = () => {
         setLocationError("Location permission denied.");
     };
 
-    const fetchNearbyPlaces = async (lat, lng, category = null) => {
+    const handleCitySelect = (cityName) => {
+        if (!cityName) return;
+        const coords = CITY_COORDS[cityName];
+        if (coords) {
+            setCurrentLatLng(coords);
+            setMapCenter([coords.lat, coords.lng]);
+            setLocation(cityName);
+            setSelectedService(null);
+            setSelectedServiceId(null);
+        }
+    };
+
+    const fetchNearbyPlaces = async (lat, lng, category = null, rad = radius) => {
         setLoading(true);
         try {
-            const data = await getNearbyPlaces(lat, lng, category);
+            const data = await getNearbyPlaces(lat, lng, category, rad);
             setServices(data);
             setFilteredServices(data);
         } catch {
@@ -85,15 +114,35 @@ const Services = () => {
     const handleManualLocationChange = async ({ lat, lng }) => {
         setCurrentLatLng({ lat, lng });
         setMapCenter([lat, lng]);
+        setSelectedService(null);
+        setSelectedServiceId(null);
     };
 
     const handleServiceSelect = (id) => {
         setSelectedServiceId((prev) => (prev === id ? null : id));
     };
 
+    const handleMarkerClick = (id) => {
+        setSelectedServiceId(id);
+        if (selectedService) {
+            const newService = filteredServices.find(s => s._id === id);
+            if (newService) setSelectedService(newService);
+        }
+    };
+
     const handleDirections = (service) => {
         setSelectedService(service);
     };
+
+    useEffect(() => {
+        const targetId = selectedServiceId || selectedService?._id;
+        if (targetId) {
+            const el = document.getElementById(`service-card-${targetId}`);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    }, [selectedServiceId, selectedService]);
 
     return (
         <div className="space-y-8">
@@ -134,7 +183,19 @@ const Services = () => {
                 </div>
 
                 {/* Location Controls */}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-4 items-center">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-bold text-gray-600">Radius: {radius / 1000}km</label>
+                        <input 
+                            type="range" 
+                            min="1" 
+                            max="20" 
+                            step="1" 
+                            value={radius / 1000}
+                            onChange={(e) => setRadius(parseInt(e.target.value) * 1000)}
+                            className="w-24 accent-blue-600"
+                        />
+                    </div>
 
                     <select
                         onChange={(e) => handleCitySelect(e.target.value)}
@@ -163,19 +224,15 @@ const Services = () => {
                 <div className="md:col-span-1 space-y-4 max-h-[80vh] overflow-y-auto">
 
                     {filteredServices.map((service) => (
-                        <div key={service._id}>
+                        <div key={service._id} id={`service-card-${service._id}`}>
                             <ServiceCard
                                 service={service}
                                 isSelected={selectedServiceId === service._id}
                                 onSelect={handleServiceSelect}
+                                isRouteActive={selectedService?._id === service._id}
+                                onGetDirections={() => handleDirections(service)}
+                                onClearDirections={() => setSelectedService(null)}
                             />
-
-                            <button
-                                onClick={() => handleDirections(service)}
-                                className="mt-2 w-full bg-blue-600 text-white py-2 rounded-xl"
-                            >
-                                Get Directions
-                            </button>
                         </div>
                     ))}
                 </div>
@@ -189,6 +246,8 @@ const Services = () => {
                         selectedService={selectedService}
                         selectedServiceId={selectedServiceId}
                         onUserLocationChange={handleManualLocationChange}
+                        onMarkerClick={handleMarkerClick}
+                        radius={radius}
                     />
                 </div>
 

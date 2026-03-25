@@ -69,6 +69,9 @@ const Grievance = () => {
 
             setFile(null);
 
+            const fileInput = document.querySelector('input[type="file"]');
+            if (fileInput) fileInput.value = "";
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -77,7 +80,6 @@ const Grievance = () => {
     };
 
     const deleteGrievance = async (id) => {
-        if (!window.confirm("Delete grievance?")) return;
 
         try {
             await axios.delete(`/grievances/${id}`);
@@ -152,25 +154,37 @@ const Grievance = () => {
                                 required
                             />
 
-                            <select
-                                name="category"
-                                value={form.category}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg p-2"
-                            >
-                                <option value="general">General</option>
-                                <option value="complaint">Complaint</option>
-                                <option value="feedback">Feedback</option>
-                                <option value="suggestion">Suggestion</option>
-                            </select>
+
 
                             <div className="flex items-center gap-3">
                                 <Upload size={18} />
                                 <input
                                     type="file"
+                                    accept="image/*"
                                     onChange={(e) => setFile(e.target.files[0])}
                                 />
                             </div>
+
+                            {file && (
+                                <div className="mt-2 relative inline-block">
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        alt="Preview"
+                                        className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFile(null);
+                                            const fileInput = document.querySelector('input[type="file"]');
+                                            if (fileInput) fileInput.value = "";
+                                        }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md hover:bg-red-600 transition-colors"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            )}
 
                             <button
                                 type="submit"

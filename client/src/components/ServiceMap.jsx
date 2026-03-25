@@ -47,12 +47,22 @@ const ServiceMap = ({
   selectedServiceId,
   selectedService,
   onUserLocationChange,
+  onMarkerClick,
+  radius,
 }) => {
   const map = useMap();
   const markerRefs = useRef({});
 
   // Route state
   const [routeCoords, setRouteCoords] = useState([]);
+
+  // Fit map to search radius
+  useEffect(() => {
+    if (userLocation && radius) {
+      const bounds = L.latLng(userLocation.lat, userLocation.lng).toBounds(radius * 2);
+      map.fitBounds(bounds, { padding: [20, 20], animate: true, duration: 1.5 });
+    }
+  }, [userLocation, radius, map]);
 
   // User icon
   const userIcon = new L.Icon({
@@ -90,7 +100,10 @@ const ServiceMap = ({
 
   // ROUTE LOGIC (MAIN FEATURE)
   useEffect(() => {
-    if (!userLocation || !selectedService) return;
+    if (!userLocation || !selectedService) {
+      setRouteCoords([]);
+      return;
+    }
 
     const fetchRoute = async () => {
       try {
@@ -112,7 +125,8 @@ const ServiceMap = ({
           setRouteCoords(coords);
 
           // Auto zoom to route
-          map.fitBounds(coords);
+          const bounds = L.latLngBounds(coords);
+          map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1.5 });
         }
       } catch (err) {
         console.error("Route error:", err);
@@ -166,6 +180,9 @@ const ServiceMap = ({
             position={[lat, lng]}
             ref={(el) => {
               if (el) markerRefs.current[service._id] = el;
+            }}
+            eventHandlers={{
+              click: () => onMarkerClick && onMarkerClick(service._id),
             }}
           >
             <Popup>

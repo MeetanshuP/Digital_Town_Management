@@ -14,9 +14,9 @@ const AdminSidebar = () => {
           <LayoutDashboard size={18} /> Dashboard
         </NavLink>
 
-        <NavLink to="/admin/service-providers" className="block p-2 rounded hover:bg-green-50">
+        {/* <NavLink to="/admin/service-providers" className="block p-2 rounded hover:bg-green-50">
           <Users size={18} /> Service Providers
-        </NavLink>
+        </NavLink> */}
 
         {/* <NavLink to="/admin/seller-requests" className="block p-2 rounded hover:bg-green-50">
           <Store size={18} /> Seller Requests

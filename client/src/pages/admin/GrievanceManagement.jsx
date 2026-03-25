@@ -8,7 +8,7 @@ const GrievanceManagement = () => {
   const fetchGrievances = async () => {
     try {
 
-      const res = await axios.get("/grievances");
+      const res = await axios.get("/admin/grievances");
       setGrievances(res.data);
 
     } catch (error) {
@@ -24,7 +24,7 @@ const GrievanceManagement = () => {
 
     try {
 
-      await axios.put(`/grievances/${id}`, { status });
+      await axios.patch(`/admin/grievances/${id}`, { status });
 
       fetchGrievances();
 
@@ -74,21 +74,35 @@ const GrievanceManagement = () => {
               {g.message}
             </p>
 
+            {g.evidence?.url && (
+              <div className="mt-4">
+                <img
+                  src={g.evidence.url}
+                  alt="Grievance Evidence"
+                  className="w-full max-w-sm rounded-lg object-cover border border-gray-200"
+                />
+              </div>
+            )}
+
             <div className="flex gap-3 mt-4">
 
-              <button
-                onClick={() => updateStatus(g._id, "in_progress")}
-                className="bg-blue-600 text-white px-3 py-1 rounded"
-              >
-                In Progress
-              </button>
+              {g.status === "open" && (
+                <button
+                  onClick={() => updateStatus(g._id, "in_progress")}
+                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                >
+                  In Progress
+                </button>
+              )}
 
-              <button
-                onClick={() => updateStatus(g._id, "resolved")}
-                className="bg-green-600 text-white px-3 py-1 rounded"
-              >
-                Resolved
-              </button>
+              {g.status !== "resolved" && (
+                <button
+                  onClick={() => updateStatus(g._id, "resolved")}
+                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                >
+                  Resolved
+                </button>
+              )}
 
             </div>
 
