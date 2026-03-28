@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../utils/axiosInstance";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Upload } from "lucide-react";
+import toast from "react-hot-toast";
 
 const AdminNews = () => {
     const [news, setNews] = useState([]);
@@ -16,6 +17,7 @@ const AdminNews = () => {
             setNews(res.data.data);
         } catch (error) {
             console.error(error);
+            toast.error("Failed to load news");
         }
     };
 
@@ -27,9 +29,11 @@ const AdminNews = () => {
         e.preventDefault();
 
         if (!title || !description) {
-            alert("Title and description are required");
+            toast.error("Title and description are required");
             return;
         }
+        
+        const tid = toast.loading(editingId ? "Updating news..." : "Adding news...");
 
         try {
             setLoading(true);
@@ -44,12 +48,15 @@ const AdminNews = () => {
 
             if (editingId) {
                 await axios.put(`/news/${editingId}`, formData);
+                toast.success("News updated successfully!", { id: tid });
             } else {
-                if (!image) {
-                    alert("Image is required");
+                if (!image && !editingId) {
+                    toast.error("Image is required", { id: tid });
+                    setLoading(false);
                     return;
                 }
                 await axios.post("/news", formData);
+                toast.success("News added successfully!", { id: tid });
             }
 
             setTitle("");
@@ -64,18 +71,42 @@ const AdminNews = () => {
 
         } catch (error) {
             console.error(error);
+            toast.error("An error occurred. Please try again.", { id: tid });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (id) => {
-        try {
-            await axios.delete(`/news/${id}`);
-            fetchNews();
-        } catch (error) {
-            console.error(error);
-        }
+    const handleDelete = (id) => {
+        toast((t) => (
+            <div className="flex flex-col gap-2">
+                <p className="font-semibold">Are you sure you want to delete this news?</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                await axios.delete(`/news/${id}`);
+                                toast.success("News deleted successfully");
+                                fetchNews();
+                            } catch (error) {
+                                console.error(error);
+                                toast.error("Failed to delete news");
+                            }
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-sm transition hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm transition hover:bg-gray-300"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        ), { duration: Infinity });
     };
 
     return (
@@ -110,32 +141,45 @@ const AdminNews = () => {
                     onChange={(e) => setDescription(e.target.value)}
                 />
 
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImage(e.target.files[0])}
-                />
-
-                {image && (
-                    <div className="mt-2 relative inline-block">
-                        <img
-                            src={typeof image === "string" ? image : URL.createObjectURL(image)}
-                            alt="Preview"
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setImage(null);
-                                const fileInput = document.querySelector('input[type="file"]');
-                                if (fileInput) fileInput.value = "";
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md hover:bg-red-600 transition-colors"
-                        >
-                            &times;
-                        </button>
-                    </div>
-                )}
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">News Image</label>
+                    {!image ? (
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100/80 transition-colors">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                                <p className="mb-1 text-sm text-gray-500"><span className="font-semibold text-blue-600">Click to upload</span> or drag and drop</p>
+                                <p className="text-xs text-gray-400">PNG, JPG or JPEG (MAX. 5MB)</p>
+                            </div>
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => setImage(e.target.files[0])}
+                            />
+                        </label>
+                    ) : (
+                        <div className="relative group w-full h-48 sm:h-64 rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                            <img
+                                src={typeof image === "string" ? image : URL.createObjectURL(image)}
+                                alt="Preview"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setImage(null);
+                                        const fileInput = document.querySelector('input[type="file"]');
+                                        if (fileInput) fileInput.value = "";
+                                    }}
+                                    className="bg-red-500/90 text-white px-5 py-2.5 rounded-lg font-medium shadow-xl hover:bg-red-600 transition-colors flex items-center gap-2"
+                                >
+                                    <Trash2 size={18} /> Remove Image
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="flex items-center gap-3">
                     <button

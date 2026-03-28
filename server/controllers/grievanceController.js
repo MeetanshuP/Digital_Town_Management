@@ -60,7 +60,7 @@ exports.getGrievanceById = async (req, res) => {
 exports.createGrievance = async (req, res) => {
     try {
 
-        const { subject, message, category } = req.body;
+        const { subject, message, category, location } = req.body;
 
         if (!subject || !message) {
             return res.status(400).json({
@@ -81,6 +81,15 @@ exports.createGrievance = async (req, res) => {
 
         }
 
+        let parsedLocation = null;
+        if (location) {
+            try {
+                parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+            } catch (err) {
+                console.error("Failed to parse location:", err);
+            }
+        }
+
         const grievance = await Grievance.create({
             subject,
             message,
@@ -88,6 +97,7 @@ exports.createGrievance = async (req, res) => {
             user: req.user.id,
             status: "open",
             evidence,
+            location: parsedLocation,
         });
 
         res.status(201).json({

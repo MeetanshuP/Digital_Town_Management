@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, MapPin, ArrowRight, ShieldPlus } from 'lucide-react';
 import axios from "../utils/axiosInstance";
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -22,12 +23,14 @@ const Register = () => {
         e.preventDefault();
         setError('');
         try {
-
             const res = await axios.post('/auth/register', formData);
+            toast.success("Account created successfully! Please log in.");
             navigate('/login');
         } catch (err) {
             console.log(err);
-            setError(err.response?.data?.message || 'Registration failed');
+            const msg = err.response?.data?.message || 'Registration failed';
+            setError(msg);
+            toast.error(msg);
         }
     };
 

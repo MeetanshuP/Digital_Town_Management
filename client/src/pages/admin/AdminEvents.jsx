@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from "../../utils/axiosInstance";
 import { Plus, Edit, Trash2, Calendar, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const AdminEvents = () => {
     const [events, setEvents] = useState([]);
@@ -29,6 +30,7 @@ const AdminEvents = () => {
         } catch (err) {
             console.error("Error fetching events:", err);
             setLoading(false);
+            toast.error("Failed to load events");
         }
     };
 
@@ -63,25 +65,47 @@ const AdminEvents = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this event?")) return;
-
-        try {
-            const token = sessionStorage.getItem('token');
-            await axios.delete(`/events/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setEvents(events.filter(e => e._id !== id));
-        } catch (err) {
-            console.error(err);
-            alert("Failed to delete event");
-        }
+    const handleDelete = (id) => {
+        toast((t) => (
+            <div className="flex flex-col gap-2">
+                <p className="font-semibold">Are you sure you want to delete this event?</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                const token = sessionStorage.getItem('token');
+                                await axios.delete(`/events/${id}`, {
+                                    headers: { Authorization: `Bearer ${token}` }
+                                });
+                                setEvents(events.filter(e => e._id !== id));
+                                toast.success("Event deleted successfully");
+                            } catch (err) {
+                                console.error(err);
+                                toast.error("Failed to delete event");
+                            }
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-sm transition hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm transition hover:bg-gray-300"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        ), { duration: Infinity });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
         setError('');
+
+        const tid = toast.loading(isEditing ? "Updating event..." : "Creating event...");
 
         try {
             const token = sessionStorage.getItem('token');
@@ -91,19 +115,21 @@ const AdminEvents = () => {
                 const res = await axios.put(`/events/${currentEventId}`, formData, config);
                 // Update local list
                 setEvents(events.map(e => e._id === currentEventId ? res.data.event : e));
-                alert("Event updated successfully!");
+                toast.success("Event updated successfully!", { id: tid });
             } else {
                 const res = await axios.post('/events', formData, config);
                 // Add to local list
                 setEvents([...events, res.data.event]);
-                alert("Event created successfully!");
+                toast.success("Event created successfully!", { id: tid });
             }
             setShowModal(false);
             // Refetch to ensure sync
             fetchEvents();
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || "Operation failed");
+            const msg = err.response?.data?.message || "Operation failed";
+            setError(msg);
+            toast.error(msg, { id: tid });
         } finally {
             setSubmitting(false);
         }

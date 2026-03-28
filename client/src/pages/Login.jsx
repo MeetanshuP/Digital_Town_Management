@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from "../utils/axiosInstance";
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const { login, user } = useAuth();
@@ -28,10 +29,12 @@ const Login = () => {
         setError('');
         try {
             const res = await axios.post('/auth/login', formData);
+            toast.success("Welcome back!");
             login(res.data.user, res.data.token);
-            // navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid Credentials');
+            const msg = err.response?.data?.message || 'Invalid Credentials';
+            setError(msg);
+            toast.error(msg);
         }
     };
 
